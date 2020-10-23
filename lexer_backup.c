@@ -3,77 +3,49 @@
 #include <string.h>
 #include "lexer.h"
 
-char* getTokenName(char str[]) {
+int check_kword(char str[]) {
   if(strlen(str)==1){
-    if(str[0]=='+')
-      return "TK_PLUS";
-    if(str[0]=='-')
-      return "TK_MINUS";
-    if(str[0]=='/')
-      return "TK_DIV";
-    if(str[0]=='*')
-      return "TK_STAR";
-    if(str[0]==';')
-      return "TK_SEMICOLON";
-    if(str[0]==':')
-      return "TK_COLON";
-    if(str[0]=='(')
-      return "BR_OP";
-    if(str[0]==')')
-      return "BR_CL";
-    if(str[0]=='[')
-      return "SQ_OP";
-    if(str[0]==']')
-      return "SQ_CL";
-    if(str[0]=='{')
-      return "CR_OP";
-    if(str[0]=='}')
-      return "CR_CL";
-    if(str[0]=='=')
-      return "TK_EQUALS";
+    if(str[0]=='+' || str[0]=='-' || str[0]=='/' || str[0]=='*' || 
+       str[0]==';' || str[0]==':' || str[0]=='(' || str[0]==')' ||
+       str[0]=='[' || str[0]==']' || str[0]=='{' || str[0]=='}' ||
+       str[0]=='=')
+      return 1;
+    return 0;
   }
-
   if(strcmp(str,"program")==0)
-    return "TK_PROGRAM"; 
+    return 1; 
   if(strcmp(str,"integer")==0)
-    return "TK_INTEGER";
+    return 1;
   if(strcmp(str,"real")==0)
-    return "TK_REAL";
+    return 1;
   if(strcmp(str,"boolean")==0)
-    return "TK_BOOLEAN";
+    return 1;
   if(strcmp(str,"array")==0)
-    return "TK_ARRAY";
+    return 1;
   if(strcmp(str,"jagged")==0)
-    return "TK_JAGGED";
+    return 1;
   if(strcmp(str,"declare")==0)
-    return "TK_DECLARE";
+    return 1;
   if(strcmp(str,"list")==0)
-    return "TK_LIST";
+    return 1;
   if(strcmp(str,"of")==0)
-    return "TK_OF";
+    return 1;
   if(strcmp(str,"variables")==0)
-    return "TK_VARIABLES";
+    return 1;
   if(strcmp(str,"size")==0)
-    return "TK_SIZE";
+    return 1;
   if(strcmp(str,"values")==0)
-    return "TK_VALUES";
-
+    return 1;
   if(strcmp(str,"&&&")==0)
-    return "TK_AND";
+    return 1;
   if(strcmp(str,"|||")==0)
-    return "TK_OR";
+    return 1;
   if(strcmp(str,"..")==0)
-    return "TK_DOTDOT";
-
+    return 1;
   if(strcmp(str,"R1")==0)
-    return "TK_ROW"; 
-
-  if(str[0] > 47 && str[0] < 58)
-    return "TK_CONSTANT";
-
-  return "TK_ID";
+    return 1; 
+  return 0;
 }
-
 
 TokenList* tokeniseSourcecode(FILE *fptr){
   TokenList* head;
@@ -92,8 +64,13 @@ TokenList* tokeniseSourcecode(FILE *fptr){
       continue;
     }
 
-    strcpy(temp -> tokens, getTokenName(temp -> lexemes));
-
+    if(check_kword(temp -> lexemes))  //keyword check
+      strcpy(temp -> tokens, temp -> lexemes);
+    else if(temp -> lexemes[0] > 47 && temp -> lexemes[0] < 58) //identifiers cannot start with a number
+      strcpy(temp -> tokens, "constant");
+    else
+      strcpy(temp -> tokens, "var");
+    
     if(feof(fptr))
       return head;
     

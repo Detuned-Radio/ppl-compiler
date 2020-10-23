@@ -3,12 +3,12 @@
 
 typedef struct TokenList {
   int line_no;
-  char lexemes[10];
+  char lexemes[13];
   char tokens[10];
   struct TokenList* next;
 } TokenList;
 
-int check_kword(char str[]);
+char* getTokenName(char str[]);
 TokenList* tokenizer(FILE *fptr);
 
 #endif

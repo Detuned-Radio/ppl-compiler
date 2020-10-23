@@ -1,6 +1,7 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
 #define SYMBOL_LEN 30
+#define NUM_RULES 59
 
 typedef struct SymList {
 	char val[SYMBOL_LEN];
