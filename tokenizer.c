@@ -46,6 +46,8 @@ int check_kword(char str[]){
   return 1;
   if(strcmp(str,"..")==0)
   return 1;
+  if(strcmp(str,"R1")==0)
+  return 1;
   return 0;
 }
 node* tokenizer(FILE *fptr){
