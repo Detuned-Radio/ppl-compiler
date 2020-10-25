@@ -35,7 +35,7 @@ union typeExp{
     jagg3 j3;
 };
 struct typeExpTable{
-  char name[20];
+  char sym[SYMBOL_LEN];
   bool isArray;
   type1 rect_jagg;
   char stat_dyn[16];
