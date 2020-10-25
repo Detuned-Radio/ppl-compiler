@@ -1,13 +1,13 @@
 #ifndef TREE_H
 #define TREE_H
 
-typedef struct _treeNode treeNode;
-typedef struct _typeExpTable typeExpTable;
+typedef struct treeNode treeNode;
+typedef struct typeExpTable typeExpTable;
 typedef struct type_prim prim;
 typedef struct type_rect rect;
 typedef struct type_jagg2 jagg2;
 typedef struct type_jagg3 jagg3;
-typedef _typeExp typeExp;
+typedef union typeExp typeExp;
 typedef enum type1{prim,rect,jagg}type1;
 typedef enum type2{integer,real,boolean}type2;
 
@@ -28,13 +28,13 @@ struct type_jagg3{
   int range2[][];
 };
 
-union _typeExp{
+union typeExp{
     prim p;
     rect r;
     jagg2 j2;
     jagg3 j3;
 };
-struct _typeExpTable{
+struct typeExpTable{
   char name[20];
   bool isArray;
   type1 rect_jagg;
@@ -42,8 +42,7 @@ struct _typeExpTable{
   typeExp t;
 };
 
-struct _treeNode{
-char name[20];
+struct treeNode{
 char sym[SYMBOL_LEN];
 bool isLeaf;
 typeExp t;
