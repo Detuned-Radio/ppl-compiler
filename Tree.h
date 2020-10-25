@@ -57,4 +57,6 @@ treeNode* right;
 treeNode* child;
 };
 
+treeNode* createNode(char name[],char sym[],bool isLeaf,typeExp t,char lexemes[],int line_no,Rule r,int depth);
+
 #endif
