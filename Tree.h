@@ -43,6 +43,7 @@ struct _typeExpTable{
 };
 
 struct _treeNode{
+char name[20];
 char sym[SYMBOL_LEN];
 bool isLeaf;
 typeExp t;
