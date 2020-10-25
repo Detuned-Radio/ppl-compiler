@@ -25,7 +25,7 @@ struct type_jagg2 {
 };
 struct type_jagg3{
   int range1[2];
-  int range2[1][];
+  int range2[][];
 };
 
 union _typeExp{
