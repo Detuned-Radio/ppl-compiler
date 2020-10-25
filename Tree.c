@@ -1,17 +1,27 @@
 #include "Tree.h"
-treeNode* createNode(char name[],char sym[],bool isLeaf,typeExp t,char lexemes[],int line_no,Rule r,int depth){
+
+treeNode* createNode(char sym[], typeExp t, char lexemes[], int line_no, Rule r){
   treeNode* temp=(treeNode*)malloc(sizeof(treeNode));
-  strcpy(temp->name,name);
   strcpy(temp->sym,sym);
-  temp->isLeaf=isLeaf;
+  temp->isLeaf= true;
   temp->t=t;
   strcpy(temp->lexemes,lexemes);
   temp->line_no=line_no;
   temp->r=r;
-  temp->depth=depth;
+  temp->depth= 0;
   temp->parent=NULL;
   temp->left=NULL;
   temp->right=NULL;
   temp->child=NULL;
   return temp;
+}
+
+treeNode* addChild(treeNode* p, treeNode* c){
+  treeNode* t = p->child;
+  while(t!= NULL){
+    t = t->right;
+  }
+  t = c;
+  t->parent = p;
+  t->depth = p->depth+1;
 }
