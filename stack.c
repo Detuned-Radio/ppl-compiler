@@ -4,21 +4,21 @@
 #include "stack.h"
 
 
+void push(StackNode** head,TreeNode* data){
 
-
-void push(TreeNode** head,int data){
-  TreeNode *temp=(TreeNode*)malloc(sizeof(TreeNode));
+  StackNode *temp=(StackNode*)malloc(sizeof(StackNode));
   temp->data=data;
-  temp->next=(*head);
+  temp->next=*head;
   (*head)=temp;
 }
 
-TreeNode* pop(TreeNode** head){
+TreeNode* pop(StackNode** head){
   if(*head==NULL){
-    return *head;
+    return NULL;
   }
-  TreeNode* temp=*head;
-  *head=(*head)->next;
+  StackNode* t=*head;
+  TreeNode* temp=(*head)->data;
+  *head=t->next;
+  free(t);
   return temp;
-
 }

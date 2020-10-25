@@ -1,11 +1,19 @@
+/*#ifndef LEXER_H
+#define LEXER_H*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 
-typedef struct t{
+typedef struct{
   int data;
-  struct t* next;
 } TreeNode;
 
-void push(TreeNode** head,int data);
-TreeNode* pop(TreeNode** head);
+typedef struct t{
+  TreeNode* data;
+  struct t* next;
+} StackNode;
+
+
+void createStack(StackNode** head);
+void push(StackNode** head,TreeNode* data);
+TreeNode* pop(StackNode** head);
