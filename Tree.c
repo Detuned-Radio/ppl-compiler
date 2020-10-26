@@ -1,43 +1,39 @@
 #include "Tree.h"
 
-treeNode* createNode(char sym[], typeExp t, char lexemes[], int line_no, Rule r){
-  treeNode* temp=(treeNode*)malloc(sizeof(treeNode));
-  strcpy(temp->sym,sym);
-  temp->isLeaf= true;
-  temp->t=t;
-  strcpy(temp->lexemes,lexemes);
-  temp->line_no=line_no;
-  temp->r=r;
-  temp->depth= 0;
-  temp->parent=NULL;
-  temp->left=NULL;
-  temp->right=NULL;
-  temp->child=NULL;
-  return temp;
+TreeNode* createNode(char* sym, char lexeme[LEXEME_LEN], int line_no, Rule* r, bool isLeaf) {
+  TreeNode* newNode = (TreeNode*) malloc(sizeof(TreeNode));
+  newNode -> sym = sym;
+  strcpy(newNode -> lexeme, lexeme);  
+  newNode -> line_no = line_no;
+  newNode -> r = r;
+  newNode -> isLeaf = isLeaf;
+  newNode -> parent = NULL;
+  newNode -> leftChild = NULL;
+  newNode -> rightChild = NULL;
+  newNode -> leftSib = NULL;
+  newNode -> rightSib = NULL;
+  return newNode;
 }
 
-treeNode* addChild(treeNode* p, treeNode* c){
-  treeNode* t = p->child;
-  while(t!= NULL){
-    t = t->right;
+TreeNode* addChild(TreeNode* parent, TreeNode* child){
+  if(parent -> rightChild) {
+    parent -> rightChild -> rightSib = child;
+    child -> leftSib = parent -> rightChild;
   }
-  if(p->child == NULL)
-    p->left = c;
-  t = c;
-  t->parent = p;
-  t->depth = p->depth+1;
+  parent -> rightChild = child;
+  child -> parent = parent;
+  child -> depth = parent -> depth + 1;
   return p;
 }
 
-void deleteAllChildren(treeNode* p)
-{
-    treeNode* temp= p->child;
-    treeNode* extra=temp;
-    while(temp!=NULL)
-    {
-        temp=temp->right;
+void deleteAllChildren(TreeNode* p) {
+    TreeNode* temp = p -> leftChild;
+    TreeNode* extra = temp;
+    while(temp != NULL) {
+        temp = temp -> right;
         free(extra);
-        extra=temp;
+        extra = temp;
     }
-    p->child=NULL;
+    p -> leftchild = NULL;
+    p -> rightChild = NULL;
 }

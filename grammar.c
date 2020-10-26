@@ -1,31 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "grammar.h"
-#define BUFF_SIZE 160
-
-Rule* readGrammar(char* grammar_path, int num_rules) {
-	FILE* fptr = fopen(grammar_path, "r");
-	Rule* grammar = (Rule*) malloc(sizeof(Rule) * num_rules);
-	char ruleBuffer[BUFF_SIZE];
-	for(int i = 0; i < num_rules; i++) {
-		fgets(ruleBuffer, BUFF_SIZE, fptr);
-		addRule(grammar, i, ruleBuffer);
-	}
-	fclose(fptr);
-	return grammar;
-}
+#include "lexer.h"
+#define RULE_BUFF_SIZE 200
+#define SYM_BUFF_SIZE 30
 
 void addRule(Rule* grammar, int index, char* ruleBuffer) {
 	int blen = strlen(ruleBuffer);
-	sscanf(ruleBuffer, "%s", grammar[index].lhs);
-	int bptr = strlen(grammar[index].lhs);
+	char symbolBuffer[SYM_BUFF_SIZE];
+	sscanf(ruleBuffer, "%s", symbolBuffer);
+	grammar[index].lhs = getTokenName(symbolBuffer, true);
+	int bptr = strlen(symbolBuffer) + 1;
 	SymList* prev = NULL;
 	SymList* curr = NULL;
 	while(bptr < blen) {
 		curr = (SymList*) malloc(sizeof(SymList));
-		sscanf(ruleBuffer + bptr, "%s", curr -> val);
-		bptr += (int) strlen(curr -> val) + 1;
+		sscanf(ruleBuffer + bptr, "%s", symbolBuffer);
+		curr -> val = getTokenName(symbolBuffer, true);
+		bptr += (int) strlen(symbolBuffer) + 1;
 		curr -> next = NULL;
 		if(prev)
 			prev -> next = curr;
@@ -34,6 +28,18 @@ void addRule(Rule* grammar, int index, char* ruleBuffer) {
 		prev = curr;
 	}
 	return;
+}
+
+Rule* readGrammar(char* grammar_path, int num_rules) {
+	FILE* fptr = fopen(grammar_path, "r");
+	Rule* grammar = (Rule*) malloc(sizeof(Rule) * num_rules);
+	char ruleBuffer[RULE_BUFF_SIZE];
+	for(int i = 0; i < num_rules; i++) {
+		fgets(ruleBuffer, RULE_BUFF_SIZE, fptr);
+		addRule(grammar, i, ruleBuffer);
+	}
+	fclose(fptr);
+	return grammar;
 }
 
 void printGrammar(Rule* grammar, int num_rules) {

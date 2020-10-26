@@ -10,7 +10,7 @@ declaration_stmt jaggarr_declaration_stmt
 prim_declaration_stmt TK_DECLARE TK_ID TK_COLON prim_type TK_SEMICOLON
 prim_declaration_stmt TK_DECLARE TK_LIST TK_OF TK_VARIABLES id_list TK_COLON prim_type TK_SEMICOLON
 id_list TK_ID id_list
-id_list id
+id_list TK_ID
 prim_type INTEGER
 prim_type REAL
 prim_type BOOLEAN
@@ -18,8 +18,8 @@ rectarr_declaration_stmt TK_DECLARE TK_ID TK_COLON TK_ARRAY range_list TK_OF pri
 rectarr_declaration_stmt TK_DECLARE TK_LIST TK_OF TK_VARIABLES id_list TK_COLON TK_ARRAY range_list TK_OF prim_type TK_SEMICOLON
 range_list range range_list
 range_list range 				
-range SQ_OP range_val .. range_val SQ_CL
-range_val id
+range SQ_OP range_val TK_DOTDOT range_val SQ_CL
+range_val TK_ID
 range_val TK_CONSTANT
 jaggarr_declaration_stmt jaggarr2d_declaration_stmt
 jaggarr_declaration_stmt jaggarr3d_declaration_stmt
@@ -51,8 +51,8 @@ factor TK_ID
 factor TK_ID SQ_OP index_list SQ_CL
 index_list index index_list
 index_list index
-index id
-index CONSANT
+index TK_ID
+index TK_CONSTANT
 bool_expression bool_term TK_OR bool_expression
 bool_expression bool_term
 bool_term factor TK_AND bool_term

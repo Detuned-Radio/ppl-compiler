@@ -1,61 +1,65 @@
 #ifndef TREE_H
 #define TREE_H
 
-typedef struct treeNode treeNode;
-typedef struct typeExpTable typeExpTable;
-typedef struct type_prim prim;
-typedef struct type_rect rect;
-typedef struct type_jagg2 jagg2;
-typedef struct type_jagg3 jagg3;
-typedef union typeExp typeExp;
-typedef enum type1{prim,rect,jagg}type1;
-typedef enum type2{integer,real,boolean}type2;
+typedef struct TreeNode TreeNode;
+typedef struct TypeExpTable TypeExpTable;
+typedef struct prim_t prim_t;
+typedef struct rect_t rect_t;
+typedef struct jagg2_t jagg2_t;
+typedef struct jagg3_t jagg3_t;
+typedef union TypeExp TypeExp;
+typedef enum typeExpTag {prim, rect, jagg2, jagg3} typeExpTag;
+typedef enum primType {integer, real, boolean} primType;
+typedef enum statDynTag {na, stat, dyn} statDynTag;
 
-struct type_prim{
-  type2 t;
+struct prim_t {
+  primType t;
 };
-struct type_rect{
+struct rect_t {
   int dimensions;
-  int range[][2];
-
+  int** range; // [][2]
 };
-struct type_jagg2 {
-  int range1[2];
-  int range2[];
+struct jagg2_t {
+  int range0[2];
+  int* range1; //[]
 };
-struct type_jagg3{
-  int range1[2];
-  int range2[][];
-};
-
-union typeExp{
-    prim p;
-    rect r;
-    jagg2 j2;
-    jagg3 j3;
-};
-struct typeExpTable{
-  char sym[SYMBOL_LEN];
-  bool isArray;
-  type1 rect_jagg;
-  char stat_dyn[16];
-  typeExp t;
+struct jagg3_t {
+  int range0[2]; 
+  int** range1; //[][]
 };
 
-struct treeNode{
-char sym[SYMBOL_LEN];
-bool isLeaf;
-typeExp t;
-char lexemes[13];
-int line_no;
-Rule r;
-int depth;
-treeNode* parent;
-treeNode* left;
-treeNode* right;
-treeNode* child;
+union TypeExp {
+  prim_t p;
+  rect_t r;
+  jagg2_t j2;
+  jagg3_t j3;
 };
 
-treeNode* createNode(char name[],char sym[],bool isLeaf,typeExp t,char lexemes[],int line_no,Rule r,int depth);
+struct TypeExpTable {
+  char* sym;
+  typeExpTag tag;
+  statDynTag statDyn;
+  TypeExp t;
+};
+
+struct TreeNode {
+  char* sym;
+  char lexeme[LEXEME_LEN];
+  int line_no;
+  Rule* r;
+  typeExpTag tag;
+  TypeExp t;
+  bool isLeaf;
+  int depth;
+  TreeNode* parent;
+  TreeNode* leftSib;
+  TreeNode* rightSib;
+  TreeNode* leftChild;
+  TreeNode* rightChild;
+};
+
+TreeNode* createNode(char* sym, char lexeme[LEXEME_LEN], int line_no, Rule* r, bool isLeaf, int depth);
+TreeNode* addChild(TreeNode* parent, TreeNode* child);
+void deleteAllChildren(TreeNode* parent);
 
 #endif

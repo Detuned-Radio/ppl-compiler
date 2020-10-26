@@ -1,20 +1,20 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
-#define SYMBOL_LEN 30
 #define NUM_RULES 59
 
 typedef struct SymList {
-	char val[SYMBOL_LEN];
+	char* val;
 	struct SymList* next;
 } SymList;
 
 typedef struct Rule {
-	char lhs[SYMBOL_LEN];
+	char* lhs;
 	SymList* rhs;
 } Rule;
 
-Rule* readGrammar(char* grammar_path, int num_rules);
+char* getSymbolName(char* symbolBuffer);
 void addRule(Rule* grammar, int index, char* ruleBuffer);
+Rule* readGrammar(char* grammar_path, int num_rules);
 void printGrammar(Rule* grammar, int num_rules);
 
 #endif
