@@ -1,5 +1,5 @@
 #include "Tree.H"
-void declaration_statement(TreeNode* root)
+void declaration_statement(TreeNode* root, TypeExpTable t)
 {
     TreeNode* temp=root->rightChild->leftSib;
     temp=temp->leftChild;
