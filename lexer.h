@@ -1,6 +1,6 @@
 #ifndef LEXER_H
 #define LEXER_H
-#define LEXEME_LEN 13
+#define LEXEME_LEN 30
 
 typedef struct TokenList {
   int line_no;
@@ -9,7 +9,7 @@ typedef struct TokenList {
   struct TokenList* next;
 } TokenList;
 
-char* getTokenName(char str[], bool checkNonTerminals);
-TokenList* tokeniseSourceCode(FILE *fptr);
+char* getTokenName(char str[], bool checkNonTerminals, bool* isTerminal);
+TokenList* tokeniseSourcecode(FILE *fptr);
 
 #endif

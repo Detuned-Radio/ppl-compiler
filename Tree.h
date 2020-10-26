@@ -36,7 +36,7 @@ union TypeExp {
 };
 
 struct TypeExpTable {
-  char* sym;
+  char* identifier;
   typeExpTag tag;
   statDynTag statDyn;
   TypeExp t;
@@ -49,7 +49,7 @@ struct TreeNode {
   Rule* r;
   typeExpTag tag;
   TypeExp t;
-  bool isLeaf;
+  bool isTerminal;
   int depth;
   TreeNode* parent;
   TreeNode* leftSib;
@@ -58,8 +58,8 @@ struct TreeNode {
   TreeNode* rightChild;
 };
 
-TreeNode* createNode(char* sym, char lexeme[LEXEME_LEN], int line_no, Rule* r, bool isLeaf, int depth);
-TreeNode* addChild(TreeNode* parent, TreeNode* child);
+TreeNode* createNode(char* sym, bool isTerminal);
+void addChild(TreeNode* parent, TreeNode* child);
 void deleteAllChildren(TreeNode* parent);
 
 #endif

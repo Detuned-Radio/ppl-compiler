@@ -4,68 +4,78 @@
 #include <stdbool.h>
 #include "lexer.h"
 
-char* getTokenName(char str[], bool checkNonTerminals) {
-  if(checkNonTerminals) {
-    if(strcmp(str, "program") == 0)
-      return "program";
-    if(strcmp(str, "programbody") == 0)
-      return "programbody";
-    if(strcmp(str, "declaration_list") == 0)
-      return "declaration_list";
-    if(strcmp(str, "assignment_list") == 0)
-      return "assignment_list";
-    if(strcmp(str, "declaration_stmt") == 0)
-      return "declaration_stmt";
-    if(strcmp(str, "assignment_stmt") == 0)
-      return "assignment_stmt";
-    if(strcmp(str, "prim_declaration_stmt") == 0)
-      return "prim_declaration_stmt";
-    if(strcmp(str, "rectarr_declaration_stmt") == 0)
-      return "rectarr_declaration_stmt";
-    if(strcmp(str, "jaggarr_declaration_stmt") == 0)
-      return "jaggarr_declaration_stmt";
-    if(strcmp(str, "prim_type") == 0)
-      return "prim_type";
-    if(strcmp(str, "id_list") == 0)
-      return "id_list";
-    if(strcmp(str, "range_list") == 0)
-      return "range_list";
-    if(strcmp(str, "range") == 0)
-      return "range";
-    if(strcmp(str, "range_val") == 0)
-      return "range_val";
-    if(strcmp(str, "jaggarr2d_declaration_stmt") == 0)
-      return "jaggarr2d_declaration_stmt";
-    if(strcmp(str, "jaggarr3d_declaration_stmt") == 0)
-      return "jaggarr3d_declaration_stmt";
-    if(strcmp(str, "jaggarr2d_init_list") == 0)
-      return "jaggarr2d_init_list";
-    if(strcmp(str, "jaggaarr2d_init_stmt") == 0)
-      return "jaggaarr2d_init_stmt";
-    if(strcmp(str, "jaggarr2d_val_list") == 0)
-      return "jaggarr2d_val_list";
-    if(strcmp(str, "jaggarr3d_init_list") == 0)
-      return "jaggarr3d_init_list";
-    if(strcmp(str, "jaggarr3d_init_stmt") == 0)
-      return "jaggarr3d_init_stmt";
-    if(strcmp(str, "jaggarr3d_row_list") == 0)
-      return "jaggarr3d_row_list";
-    if(strcmp(str, "jaggarr3d_val_list") == 0)
-      return "jaggarr3d_val_list";
-    if(strcmp(str, "expression") == 0)
-      return "expression";
-    if(strcmp(str, "bool_expression") == 0)
-      return "bool_expression";
-    if(strcmp(str, "term") == 0)
-      return "term";
-    if(strcmp(str, "factor") == 0)
-      return "factor";
-    if(strcmp(str, "index_list") == 0)
-      return "index_list";
-    if(strcmp(str, "index") == 0)
-      return "index";
-    if(strcmp(str, "bool_term") == 0)
-      return "bool_term";
+char* getTokenName(char str[], bool forGrammar, bool* isTerminal) {
+  if(isTerminal && !forGrammar) {
+    printf("getTokenName: Must set forGrammar if want to check symbol type (isTerminal).\n");
+    return NULL;
+  }
+  if(forGrammar) {
+    if(isTerminal)
+      *isTerminal = false;
+    if(strcmp(str, "PROGRAM") == 0)
+      return "PROGRAM";
+    if(strcmp(str, "PROGRAMBODY") == 0)
+      return "PROGRAMBODY";
+    if(strcmp(str, "DECLARATION_LIST") == 0)
+      return "DECLARATION_LIST";
+    if(strcmp(str, "ASSIGNMENT_LIST") == 0)
+      return "ASSIGNMENT_LIST";
+    if(strcmp(str, "DECLARATION_STMT") == 0)
+      return "DECLARATION_STMT";
+    if(strcmp(str, "ASSIGNMENT_STMT") == 0)
+      return "ASSIGNMENT_STMT";
+    if(strcmp(str, "PRIM_DECLARATION_STMT") == 0)
+      return "PRIM_DECLARATION_STMT";
+    if(strcmp(str, "RECTARR_DECLARATION_STMT") == 0)
+      return "RECTARR_DECLARATION_STMT";
+    if(strcmp(str, "JAGGARR_DECLARATION_STMT") == 0)
+      return "JAGGARR_DECLARATION_STMT";
+    if(strcmp(str, "PRIM_TYPE") == 0)
+      return "PRIM_TYPE";
+    if(strcmp(str, "ID_LIST") == 0)
+      return "ID_LIST";
+    if(strcmp(str, "RANGE_LIST") == 0)
+      return "RANGE_LIST";
+    if(strcmp(str, "RANGE") == 0)
+      return "RANGE";
+    if(strcmp(str, "RANGE_VAL") == 0)
+      return "RANGE_VAL";
+    if(strcmp(str, "JAGGARR2D_DECLARATION_STMT") == 0)
+      return "JAGGARR2D_DECLARATION_STMT";
+    if(strcmp(str, "JAGGARR3D_DECLARATION_STMT") == 0)
+      return "JAGGARR3D_DECLARATION_STMT";
+    if(strcmp(str, "JAGGARR2D_INIT_LIST") == 0)
+      return "JAGGARR2D_INIT_LIST";
+    if(strcmp(str, "JAGGARR2D_INIT_STMT") == 0)
+      return "JAGGARR2D_INIT_STMT";
+    if(strcmp(str, "JAGGARR2D_VAL_LIST") == 0)
+      return "JAGGARR2D_VAL_LIST";
+    if(strcmp(str, "JAGGARR3D_INIT_LIST") == 0)
+      return "JAGGARR3D_INIT_LIST";
+    if(strcmp(str, "JAGGARR3D_INIT_STMT") == 0)
+      return "JAGGARR3D_INIT_STMT";
+    if(strcmp(str, "JAGGARR3D_ROW_LIST") == 0)
+      return "JAGGARR3D_ROW_LIST";
+    if(strcmp(str, "JAGGARR3D_VAL_LIST") == 0)
+      return "JAGGARR3D_VAL_LIST";
+    if(strcmp(str, "EXPRESSION") == 0)
+      return "EXPRESSION";
+    if(strcmp(str, "BOOL_EXPRESSION") == 0)
+      return "BOOL_EXPRESSION";
+    if(strcmp(str, "TERM") == 0)
+      return "TERM";
+    if(strcmp(str, "FACTOR") == 0)
+      return "FACTOR";
+    if(strcmp(str, "INDEX_LIST") == 0)
+      return "INDEX_LIST";
+    if(strcmp(str, "INDEX") == 0)
+      return "INDEX";
+    if(strcmp(str, "BOOL_TERM") == 0)
+      return "BOOL_TERM";
+    if(isTerminal)
+      *isTerminal = true;
+    if(strcmp(str, "CONSTANT") == 0)
+      return "CONSTANT";
   }
 
   if(strlen(str)==1){
@@ -133,9 +143,9 @@ char* getTokenName(char str[], bool checkNonTerminals) {
     return "TK_ROW"; 
 
   if(str[0] > 47 && str[0] < 58)
-    return "TK_CONSTANT";
+    return "CONSTANT";
 
-  return "TK_ID";
+  return "ID";
 }
 
 
@@ -156,7 +166,7 @@ TokenList* tokeniseSourcecode(FILE *fptr){
       continue;
     }
 
-    temp -> token = getTokenName(temp -> lexeme, 0);
+    temp -> token = getTokenName(temp -> lexeme, false, NULL);
 
     if(feof(fptr))
       return head;
@@ -169,18 +179,18 @@ TokenList* tokeniseSourcecode(FILE *fptr){
   }
 }
 
-int main(){
-    FILE* fptr=fopen("test.txt","r");
-    TokenList *head=tokeniseSourcecode(fptr);
-    fclose(fptr);
-    int c = 0;
+// int main(){
+//     FILE* fptr=fopen("test.txt","r");
+//     TokenList *head=tokeniseSourcecode(fptr);
+//     fclose(fptr);
+//     int c = 0;
 
-    while(head != NULL){
-      printf("%d %s %s\n", head -> line_no, head -> lexeme, head -> token);
-      head = head -> next;
-      c++;
-    }
-    printf("Length of token stream: %d\n",c);
+//     while(head != NULL){
+//       printf("%d %s %s\n", head -> line_no, head -> lexeme, head -> token);
+//       head = head -> next;
+//       c++;
+//     }
+//     printf("Length of token stream: %d\n",c);
 
-    //printf("%s",cd);
-}
+//     //printf("%s",cd);
+// }

@@ -11,14 +11,14 @@ void addRule(Rule* grammar, int index, char* ruleBuffer) {
 	int blen = strlen(ruleBuffer);
 	char symbolBuffer[SYM_BUFF_SIZE];
 	sscanf(ruleBuffer, "%s", symbolBuffer);
-	grammar[index].lhs = getTokenName(symbolBuffer, true);
+	grammar[index].lhs = getTokenName(symbolBuffer, true, NULL);
 	int bptr = strlen(symbolBuffer) + 1;
 	SymList* prev = NULL;
 	SymList* curr = NULL;
 	while(bptr < blen) {
 		curr = (SymList*) malloc(sizeof(SymList));
 		sscanf(ruleBuffer + bptr, "%s", symbolBuffer);
-		curr -> val = getTokenName(symbolBuffer, true);
+		curr -> val = getTokenName(symbolBuffer, true, &(curr -> isTerminal));
 		bptr += (int) strlen(symbolBuffer) + 1;
 		curr -> next = NULL;
 		if(prev)
@@ -47,6 +47,8 @@ void printGrammar(Rule* grammar, int num_rules) {
 		printf("%d: %s --> ", i+1, grammar[i].lhs);
 		SymList* rptr = grammar[i].rhs;
 		while(rptr) {
+			if(rptr -> isTerminal)
+				printf("#");
 			printf("%s ", rptr -> val);
 			rptr = rptr -> next;
 		}
@@ -55,14 +57,14 @@ void printGrammar(Rule* grammar, int num_rules) {
 	return;
 }
 
-int main(int argc, char** argv) {
-	if(argc != 3) {
-		printf("Usage: ./grammartest <path to grammar txt> <number of rules>\n");
-		return 0;
-	}
-	char* grammar_path = argv[1];
-	int num_rules = atoi(argv[2]);
-	Rule* grammar = readGrammar(grammar_path, num_rules);
-	printGrammar(grammar, num_rules);
-	return 0;
-}
+// int main(int argc, char** argv) {
+// 	if(argc != 3) {
+// 		printf("Usage: ./grammartest <path to grammar txt> <number of rules>\n");
+// 		return 0;
+// 	}
+// 	char* grammar_path = argv[1];
+// 	int num_rules = atoi(argv[2]);
+// 	Rule* grammar = readGrammar(grammar_path, num_rules);
+// 	printGrammar(grammar, num_rules);
+// 	return 0;
+// }

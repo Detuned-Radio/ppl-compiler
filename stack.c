@@ -15,9 +15,9 @@ Stack* createStack(void) {
 
 void push(Stack* st, TreeNode* data){
   StackNode* newNode = (StackNode*) malloc(sizeof(StackNode));
-  temp -> data = data;
-  temp -> next = st -> top;
-  st -> top = temp;
+  newNode -> data = data;
+  newNode -> next = st -> top;
+  st -> top = newNode;
   (st -> size)++;
 }
 
@@ -33,16 +33,10 @@ TreeNode* pop(Stack* st){
   return poppedData;
 }
 
-bool isEmpty(Stack* st) {
-  return (st -> size == 0);
+TreeNode* top(Stack* st) {
+  return st -> top -> data;
 }
 
-int main(void) {
-  Stack* st = createStack();
-  for(int i = 0; i < 10; i++)
-    push(st, i+1);
-  while(!isEmpty(st)) {
-    printf("%d\n", pop(st));
-  }
-  return 0;
+bool isEmpty(Stack* st) {
+  return (st -> size == 0);
 }

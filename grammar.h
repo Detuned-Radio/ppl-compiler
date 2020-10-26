@@ -4,6 +4,7 @@
 
 typedef struct SymList {
 	char* val;
+	bool isTerminal;
 	struct SymList* next;
 } SymList;
 

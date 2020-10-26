@@ -15,5 +15,6 @@ typedef struct Stack {
 Stack* createStack(void);
 void push(Stack* st, TreeNode* data);
 TreeNode* pop(Stack* st);
+TreeNode* top(Stack* st);
 bool isEmpty(Stack* st);
 #endif
