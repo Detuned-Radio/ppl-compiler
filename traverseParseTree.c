@@ -8,7 +8,7 @@
 #include "Tree.h"
 #include "parser.h"
 
-void declaration_statement(TreeNode* root, TypeExpTable t)
+void declaration_statement(TreeNode* root)
 {
     TreeNode* temp=root->rightChild->leftSib;
     temp=temp->leftChild;
