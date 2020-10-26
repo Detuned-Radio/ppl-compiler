@@ -25,3 +25,16 @@ treeNode* addChild(treeNode* p, treeNode* c){
   t->parent = p;
   t->depth = p->depth+1;
 }
+
+void deleteAllChildren(treeNode* p)
+{
+    treeNode* temp= p->child;
+    treeNode* extra=temp;
+    while(temp!=NULL)
+    {
+        temp=temp->right;
+        free(extra);
+        extra=temp;
+    }
+    p->child=NULL;
+}
