@@ -21,9 +21,12 @@ treeNode* addChild(treeNode* p, treeNode* c){
   while(t!= NULL){
     t = t->right;
   }
+  if(p->child == NULL)
+    p->left = c;
   t = c;
   t->parent = p;
   t->depth = p->depth+1;
+  return p;
 }
 
 void deleteAllChildren(treeNode* p)
