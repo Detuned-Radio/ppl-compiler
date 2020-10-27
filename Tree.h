@@ -13,7 +13,7 @@ typedef enum primType {integer, real, boolean} primType;
 typedef enum statDynTag {na, stat, dyn} statDynTag;
 
 struct prim_t {
-  primType t;
+  primType primitiveType;
 };
 struct rect_t {
   int dimensions;
@@ -36,7 +36,7 @@ union TypeExp {
 };
 
 struct TypeExpTable {
-  char* identifier;
+  char identifier[LEXEME_LEN];
   typeExpTag tag;
   statDynTag statDyn;
   TypeExp t;
