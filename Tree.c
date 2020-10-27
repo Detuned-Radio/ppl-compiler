@@ -21,6 +21,8 @@ void addChild(TreeNode* parent, TreeNode* child){
   if(parent -> rightChild) {
     parent -> rightChild -> rightSib = child;
     child -> leftSib = parent -> rightChild;
+  } else {
+    parent -> leftChild = child;
   }
   parent -> rightChild = child;
   child -> parent = parent;

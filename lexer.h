@@ -11,5 +11,5 @@ typedef struct TokenList {
 
 char* getTokenName(char str[], bool checkNonTerminals, bool* isTerminal);
 TokenList* tokeniseSourcecode(FILE *fptr);
-
+void printTokenStream(TokenList* head);
 #endif

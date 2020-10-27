@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
 #include "lexer.h"
+#define CODE_BUFF_SIZE 300
 
 char* getTokenName(char str[], bool forGrammar, bool* isTerminal) {
   if(isTerminal && !forGrammar) {
@@ -150,47 +152,44 @@ char* getTokenName(char str[], bool forGrammar, bool* isTerminal) {
 
 
 TokenList* tokeniseSourcecode(FILE *fptr){
-  TokenList* head;
+  TokenList* head = NULL;
   int line_no=1;
   head = (TokenList*)malloc(sizeof(TokenList));
-  TokenList *temp = head;
-  while(1){
-    fscanf(fptr, "%[^ \n]", temp -> lexeme);
-    char break_char = fgetc(fptr);
-
-    temp -> line_no = line_no;
-
-    if(strlen(temp -> lexeme) == 0) {
-      if(break_char == '\n')
-        line_no++;
-      continue;
+  TokenList *temp = NULL;
+  char codeBuffer[CODE_BUFF_SIZE];
+  while(fgets(codeBuffer, CODE_BUFF_SIZE, fptr)) {
+    int clen = strlen(codeBuffer);
+    int cptr = 0;
+    
+    if(clen == 1 && isspace(codeBuffer[0])) {
+         continue;
     }
 
-    temp -> token = getTokenName(temp -> lexeme, false, NULL);
-
+    while(cptr < clen) {
+      if(temp) {
+        temp -> next = (TokenList*) malloc(sizeof(TokenList));
+        temp = temp -> next;
+      } else {
+        head = temp = (TokenList*) malloc(sizeof(TokenList));
+      }
+      sscanf(codeBuffer + cptr, "%s", temp -> lexeme);
+      cptr += strlen(temp -> lexeme) + 1;
+      temp -> line_no = line_no;
+      temp -> token = getTokenName(temp -> lexeme, false, NULL);
+    }
+    line_no++;
     if(feof(fptr))
-      return head;
-    
-    temp -> next = (TokenList*) malloc(sizeof(TokenList));
-    temp = temp -> next;
-
-    if(break_char == '\n') 
-      line_no++;
+      break;
   }
+  return head;
 }
 
-// int main(){
-//     FILE* fptr=fopen("test.txt","r");
-//     TokenList *head=tokeniseSourcecode(fptr);
-//     fclose(fptr);
-//     int c = 0;
-
-//     while(head != NULL){
-//       printf("%d %s %s\n", head -> line_no, head -> lexeme, head -> token);
-//       head = head -> next;
-//       c++;
-//     }
-//     printf("Length of token stream: %d\n",c);
-
-//     //printf("%s",cd);
-// }
+void printTokenStream(TokenList* head){
+    int c = 0;
+    while(head != NULL){
+      printf("%d %s %s\n", head -> line_no, head -> lexeme, head -> token);
+      head = head -> next;
+      c++;
+    }
+    printf("Length of token stream: %d\n",c);
+}
