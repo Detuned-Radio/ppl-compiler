@@ -61,7 +61,7 @@ void populate_rect(TreeNode* tr){
     tr->t->range[i] = (int *)malloc(sizeof(int)*2);
   }
 
-// assigning values to ranges
+  // assigning values to ranges
   int x = 0;
   while(temp->leftChild != temp->rightChild){
       tr->t->range[x][0] = temp->leftChild->leftChild->rightSib;  //range list --> range --> second child gives first subscript of range
