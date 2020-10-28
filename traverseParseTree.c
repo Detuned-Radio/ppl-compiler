@@ -178,6 +178,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
       do{
         popu->identifier = strcpy(popu->identifier,it->leftChild->lexeme);
         popu->t = it->t;
+        popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
         popu = popu->next;
         it = it->rightChild;
       }while(it->leftChild != it->rightChild)
@@ -185,6 +186,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
     else if(iter->leftChild->rightSib->sym == "ID"){
       popu->identifier = strcpy(popu->identifier,iter->leftChild->rightSib->lexeme);
       popu->t = iter->t;
+      popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
       popu = popu->next;
     }
     temp = temp->rightChild;
