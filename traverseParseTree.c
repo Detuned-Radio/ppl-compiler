@@ -132,10 +132,11 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
     while(temp != "SIZE"){
       temp = temp->rightSib;
     }
-    jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*(atoi)temp->rightSib->lexeme);
-    TreeNode* temp2 = temp->parent->rightChild->leftSib;
+    jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*((atoi)temp->rightSib->lexeme)+1); 
+    jaggDecStmt->t->j2->range1[x][0] = (atoi)temp->rightSib->lexeme); //size of row list stored at first place
+    TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
     int y=0;
-    int a=0;
+    int a=1;
     do
     {
       TreeNode* temp3=temp2->leftChild;//temp3 = JAGGARR3D_VAL_LIST
@@ -147,10 +148,9 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
 
       jaggDecStmt->t->j2->range1[x][a];
       a++;
+      temp2 = temp2->rightChild;
 
-    }while()
-
-    //   }while(init->leftChild != init->rightChild);
+    }while(temp2->leftChild != temp2->rightChild)
 
 
 
