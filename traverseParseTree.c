@@ -168,7 +168,7 @@ void propagateTypeExp(TreeNode* node) {
   }
 }
 
-void propagateTable(TreeNode* root , TypeExpTable* head){
+void populateTable(TreeNode* root , TypeExpTable* head){
   TypeExpTable* popu = head;
   Treenode* temp = root->rightChild->leftSib->leftChild; //DECLARATION_lIST
   do{
