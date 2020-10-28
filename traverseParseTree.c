@@ -146,14 +146,11 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       }
       while(temp3->leftChild !=temp3->rightChild)
 
-      jaggDecStmt->t->j2->range1[x][a];
+      jaggDecStmt->t->j2->range1[x][a] = y;
       a++;
       temp2 = temp2->rightChild;
 
-    }while(temp2->leftChild != temp2->rightChild)
-
-
-
+    }while(temp2->leftChild != temp2->rightChild);
     x++;
     init = init->rightChild;
   }while(init->leftChild != init->rightChild);
