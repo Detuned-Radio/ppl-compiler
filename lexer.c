@@ -160,7 +160,7 @@ TokenList* tokeniseSourcecode(FILE *fptr){
   while(fgets(codeBuffer, CODE_BUFF_SIZE, fptr)) {
     int clen = strlen(codeBuffer);
     int cptr = 0;
-
+  //  printf("%s%ld\n",codeBuffer,strlen(codeBuffer));
 
 
   cnt++;
@@ -181,6 +181,7 @@ TokenList* tokeniseSourcecode(FILE *fptr){
         free(temp);
         trial->next=NULL;
         temp=trial;
+        break;
       }
       int i=0;
       while(codeBuffer[i+cptr]!=temp->lexeme[0]){
