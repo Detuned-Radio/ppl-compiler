@@ -107,7 +107,7 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
   do
   {
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
-    while(temp != "SIZE"){
+    while(temp->sym != "TK_SIZE"){
       temp = temp->rightSib;
     }
     jaggDecStmt->t->j2->range1[x] = (atoi)temp->rightSib->lexeme;
@@ -132,7 +132,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
   do
   {
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
-    while(temp != "SIZE"){
+    while(temp->sym != "TK_SIZE"){
       temp = temp->rightSib;
     }
     jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*((atoi)temp->rightSib->lexeme)+1); 
@@ -162,9 +162,6 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
 
 void propagateTypeExp(TreeNode* node) {
   // if identifier, add entry to TypeExpTable
-  if(node -> sym == "ID") {
-
-  }
   node -> t = node -> parent -> t;
   node -> tag = node -> parent -> tag;
   TreeNode* child = node -> leftChild;
@@ -172,6 +169,31 @@ void propagateTypeExp(TreeNode* node) {
     propagateTypeExp(child);
     child = child -> rightSib;
   }
+}
+
+void populateTable(TreeNode* root , TypeExpTable* head){
+  TypeExpTable* popu = head;
+  Treenode* temp = root->rightChild->leftSib->leftChild; //DECLARATION_lIST
+  do{
+    TreeNode* iter = temp->leftChild->leftChild; //TYPE_DECLARATION_STMT
+    if(iter->leftChild->rightSib->sym == "TK_LIST"){
+      TreeNode* it = iter->rightChild->leftSib->leftChild; //id_list
+      do{
+        popu->identifier = strcpy(popu->identifier,it->leftChild->lexeme);
+        popu->t = it->t;
+        popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
+        popu = popu->next;
+        it = it->rightChild;
+      }while(it->leftChild != it->rightChild)
+    }
+    else if(iter->leftChild->rightSib->sym == "ID"){
+      popu->identifier = strcpy(popu->identifier,iter->leftChild->rightSib->lexeme);
+      popu->t = iter->t;
+      popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
+      popu = popu->next;
+    }
+    temp = temp->rightChild;
+  }while(temp->leftChild != temp->rightChild)
 }
 
 void traverseAsgList(TreeNode* root, TypeExpTable* table) {
@@ -187,7 +209,7 @@ void traverseAsgList(TreeNode* root, TypeExpTable* table) {
 
 void processAsgStmt(TreeNode* asgStmt){
   processExpression(asgStmt -> rightChild -> leftSib);
-  if(asgStmt -> leftChild -> sym == "ID" )
+  getTypeExp(asgStmt -> leftChild);
   TypeExp lhs = asgStmt -> leftChild -> t;
   typeExpTag lhsTag = asgStmt -> leftChild -> tag;
   TypeExp rhs = asgStmt -> rightChild -> leftSib -> t;
