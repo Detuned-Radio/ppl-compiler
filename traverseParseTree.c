@@ -133,7 +133,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       temp = temp->rightSib;
     }
     jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*((atoi)temp->rightSib->lexeme)+1); 
-    jaggDecStmt->t->j2->range1[x][0] = (atoi)temp->rightSib->lexeme); //size of row list stored at first place
+    jaggDecStmt->t->j2->range1[x][0] = ((atoi)temp->rightSib->lexeme); //size of row list stored at first place
     TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
     int y=0;
     int a=1;
