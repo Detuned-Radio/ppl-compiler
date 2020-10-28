@@ -159,9 +159,6 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
 
 void propagateTypeExp(TreeNode* node) {
   // if identifier, add entry to TypeExpTable
-  if(node -> sym == "ID") {
-
-  }
   node -> t = node -> parent -> t;
   node -> tag = node -> parent -> tag;
   TreeNode* child = node -> leftChild;
