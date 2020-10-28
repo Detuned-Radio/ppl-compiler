@@ -192,3 +192,9 @@ void printTokenStream(TokenList* head){
     }
     printf("Length of token stream: %d\n",c);
 }
+
+int main(){
+  FILE* fptr=fopen("t1.txt","r");
+  TokenList* head=tokeniseSourcecode(fptr);
+  printTokenStream(head);
+}

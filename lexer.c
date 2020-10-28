@@ -168,14 +168,20 @@ TokenList* tokeniseSourcecode(FILE *fptr){
   clen=clen-1;
 
     while(cptr < clen) {
-
+      TokenList *trial;
       if(temp) {
         temp -> next = (TokenList*) malloc(sizeof(TokenList));
+        trial=temp;
         temp = temp -> next;
       } else {
         head = temp = (TokenList*) malloc(sizeof(TokenList));
       }
       sscanf(codeBuffer + cptr, "%s", temp->lexeme);
+      if(strlen(temp->lexeme)==0){
+        free(temp);
+        trial->next=NULL;
+        temp=trial;
+      }
       int i=0;
       while(codeBuffer[i+cptr]!=temp->lexeme[0]){
         i++;
