@@ -168,6 +168,29 @@ void propagateTypeExp(TreeNode* node) {
   }
 }
 
+void propagateTable(TreeNode* root , TypeExpTable* head){
+  TypeExpTable* popu = head;
+  Treenode* temp = root->rightChild->leftSib->leftChild; //DECLARATION_lIST
+  do{
+    TreeNode* iter = temp->leftChild->leftChild; //TYPE_DECLARATION_STMT
+    if(iter->leftChild->rightSib->sym == "TK_LIST"){
+      TreeNode* it = iter->rightChild->leftSib->leftChild; //id_list
+      do{
+        popu->identifier = strcpy(head->identifier,it->leftChild->lexeme);
+        popu->t = it->t;
+        popu = popu->next;
+        it = it->rightChild;
+      }while(it->leftChild != it->rightChild)
+    }
+    else if(iter->leftChild->rightSib->sym == "ID"){
+      popu->identifier = strcpy(head->identifier,iter->leftChild->rightSib->lexeme);
+      popu->t = iter->t;
+      popu = popu->next;
+    }
+    temp = temp->rightChild;
+  }while(temp->leftChild != temp->rightChild)
+}
+
 void traverseAsgList(TreeNode* root, TypeExpTable* table) {
   TreeNode* programBody = root -> rightChild -> leftSib;
   TreeNode* asgList = programBody -> rightChild;
