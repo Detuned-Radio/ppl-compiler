@@ -28,10 +28,13 @@ void processDecStmt(TreeNode* decStmt) {
     processRectDecStmt(decStmt -> leftChild);
   } else if(decStmt -> leftChild -> leftChild -> sym == "JAGGARR2D_DECLARATION_STMT") {
     decStmt -> leftChild -> tag = 2;  // setting tag to jagg2
-    processJagg2DDecStmt(decStmt -> leftChild);
+    processJagg2DDecStmt(decStmt-> leftChild->leftChild);
+      decStmt-> leftChild->typeExp = decStmt-> leftChild->leftChild->TypeExp;
   } else if(decStmt -> leftChild -> leftChild -> sym == "JAGGARR3D_DECLARATION_STMT") {
     decStmt -> leftChild -> tag = 3;  // setting tag to jagg3
-    processJagg3DDecStmt(decStmt -> leftChild);
+    processJagg3DDecStmt(decStmt -> leftChild->leftChild);
+      decStmt-> leftChild->typeExp = decStmt-> leftChild->leftChild->TypeExp;
+
   }
   // copy to decStmt
   decStmt -> tag = decStmt -> leftChild -> tag;
@@ -85,10 +88,84 @@ void processRectDecStmt(TreeNode* rectDecStmt){
 
 }
 
+void processJagg2DDecStmt(TreeNode * jaggDecStmt){
+   TreeNode * range = jaggDecStmt->leftChild;
+   while(range->sym!= "RANGE")
+    range = range->rightSib;
+
+  jaggDecStmt->t->j2->range0[0] = range->leftChild -> rightSib;
+  jaggDecStmt->t->j2->range0[1] =  range-> leftChild -> rightSib -> rightSib -> rightSib;
+
+  int numRows = range0[1]-range0[0]+1;
+  jaggDecStmt->t->j2->range1 = (int*) malloc(sizeof(int)* numRows);
+
+  TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR2D_INIT_LIST
+  int x = 0;
+  do
+  {
+    TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
+    while(temp != "SIZE"){
+      temp = temp->rightSib;
+    }
+    jaggDecStmt->t->j2->range1[x] = (atoi)temp->rightSib->lexeme;
+    x++;
+    init = init->rightChild;
+  }while(init->leftChild != init->rightChild);
+}
+
+void processJagg3DDecStmt(TreeNode * jaggDecStmt){
+  TreeNode * range = jaggDecStmt->leftChild;
+  while(range->sym!= "RANGE")
+   range = range->rightSib;
+
+  jaggDecStmt->t->j3->range0[0] = range->leftChild -> rightSib;
+  jaggDecStmt->t->j3->range0[1] =  range-> leftChild -> rightSib -> rightSib -> rightSib;
+
+  int numRows = range0[1]-range0[0]+1;
+  jaggDecStmt->t->j3->range1 = (int**) malloc(sizeof(int*) * numRows);
+
+  TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR3D_INIT_LIST
+  int x = 0;
+  do
+  {
+    TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
+    while(temp != "SIZE"){
+      temp = temp->rightSib;
+    }
+    jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*(atoi)temp->rightSib->lexeme);
+    TreeNode* temp2 = temp->parent->rightChild->leftSib;
+    int y=0;
+    int a=0;
+    do
+    {
+      TreeNode* temp3=temp2->leftChild;//temp3 = JAGGARR3D_VAL_LIST
+      do{
+        y++;
+        temp3=temp3->rightChild;
+      }
+      while(temp3->leftChild !=temp3->rightChild)
+
+      jaggDecStmt->t->j2->range1[x][a];
+      a++;
+
+    }while()
+
+    //   }while(init->leftChild != init->rightChild);
+
+
+
+    x++;
+    init = init->rightChild;
+  }while(init->leftChild != init->rightChild);
+}
+
+
+}
+
 void propagateTypeExp(TreeNode* node) {
   // if identifier, add entry to TypeExpTable
   if(node -> sym == "ID") {
-    
+
   }
   node -> t = node -> parent -> t;
   node -> tag = node -> parent -> tag;
