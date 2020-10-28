@@ -25,7 +25,7 @@ void processDecStmt(TreeNode* decStmt) {
     processPrimDecStmt(decStmt -> leftChild);
   } else if(decStmt -> leftChild -> sym == "RECTARR_DECLARATION_STMT") {
     decStmt -> leftChild -> tag = 1;  // setting tag to rect
-    processRectDecStmt(decStmt -> leftChild);
+    processRectDecStmt(decStmt -> leftChild); //pending: variable 
   } else if(decStmt -> leftChild -> leftChild -> sym == "JAGGARR2D_DECLARATION_STMT") {
     decStmt -> leftChild -> tag = 2;  // setting tag to jagg2
     processJagg2DDecStmt(decStmt -> leftChild);
@@ -88,7 +88,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
 void propagateTypeExp(TreeNode* node) {
   // if identifier, add entry to TypeExpTable
   if(node -> sym == "ID") {
-    
+
   }
   node -> t = node -> parent -> t;
   node -> tag = node -> parent -> tag;
@@ -98,3 +98,99 @@ void propagateTypeExp(TreeNode* node) {
     child = child -> rightSib;
   }
 }
+
+void traverseAsgList(TreeNode* root, TypeExpTable* table) {
+  TreeNode* programBody = root -> rightChild -> leftSib;
+  TreeNode* asgList = programBody -> rightChild;
+  while(asgList -> leftChild != asgList -> rightChild)
+  {
+      processAsgStmt(asgList -> leftChild);  // process decStmt
+      asgList = asgList -> rightChild; //move to next decListNode
+  }
+  processAsgStmt(asgList -> leftChild); //process last decStmt
+}
+
+void processAsgStmt(TreeNode* asgStmt){
+  processExpression(asgStmt -> rightChild -> leftSib);
+  getTypeExp(asgStmt -> leftChild);
+  TypeExp lhs = asgStmt -> leftChild -> t;
+  typeExpTag lhsTag = asgStmt -> leftChild -> tag;
+  TypeExp rhs = asgStmt -> rightChild -> leftSib -> t;
+  typeExpTag rhsTag = asgStmt -> rightChild -> leftSib -> tag;
+  if(lhsTag == 0 && equalTypeExp(lhs, lhsTag, rhs, rhsTag)) {
+    asgStmt -> t = lhs;
+    asgStmt -> tag = lhsTag;
+  } else {
+    printf("ERROR: ASSIGNMENT\n");
+  }
+}
+
+void processExpression(TreeNode* expr) {
+  if(expr -> leftChild == NULL) {
+    if(expr -> sym == "CONSTANT") {
+      expr -> tag = 0;
+      expr -> t -> p -> primitiveType = 0;
+      return;
+    }
+    if(expr -> sym == "ID") {
+      getTypeExp(expr);
+      return;
+    }
+  }
+  if(expr -> rightChild -> sym == "SQ_CL") {
+    processArrayVariable(expr);
+    return;
+  }
+  if(expr -> leftChild == expr -> rightChild) {
+    processExpression(expr -> leftChild);
+    expr -> t = expr -> leftChild -> t;
+    expr -> tag = expr -> leftChild -> tag;
+    return;
+  }
+  processExpression(expr -> leftChild);
+  processExpression(expr -> rightChild);
+  TypeExp lhs = expr -> leftChild -> t;
+  typeExpTag lhsTag = expr -> leftChild -> tag;
+  TypeExp rhs = expr -> rightChild -> leftSib -> t;
+  typeExpTag rhsTag = aexpr -> rightChild -> leftSib -> tag;
+  char* operator = expr -> leftChild -> rightSib;
+  if(checkOperands(lhs, lhsTag, sym, rhs, rhsTag)) {
+    expr -> t = expr -> leftChild -> t;
+    expr -> tag = expr -> leftChild -> tag;
+    return;
+  } else {
+    printf("ERROR");
+  }
+}
+
+void processArrayVariable(TreeNode* arrVar) {
+  getTypeExp(arrVar -> leftChild);
+  TypeExp arr = arrVar -> leftChild -> t;
+  typeExpTag arrTag = arrVar - >leftChild -> tag;
+  TreeNode* indexList = arrVar -> rightChild -> leftSib;
+  if(arrTag == 1) {
+    int dimensions = arr -> r -> dimensions;
+    while(indexList -> leftChild != indexList -> rightChild) {
+      if(dimensions <= 0)
+        break;
+      dimensions--;
+      int index = atoi(indexList -> leftChild -> leftChild -> lexeme);
+      if(index >= arr -> r -> range[dimensions][0] && index <= arr -> r -> range[dimensions][1]) {
+        arrVar -> tag = 0;
+        arrVar -> t -> p -> primitiveType = 0;
+        return;
+      } else {
+        printf("ERROR");
+      }
+    }
+  } else if(arrTag == 2) {
+
+  } else if(arrTag == 3) {
+    
+  }
+}
+
+
+getTypeExp
+equalTypeExp
+checkOperands

@@ -1,6 +1,6 @@
 #ifndef LEXER_H
 #define LEXER_H
-#define LEXEME_LEN 30
+#define LEXEME_LEN 25
 
 typedef struct TokenList {
   int line_no;
