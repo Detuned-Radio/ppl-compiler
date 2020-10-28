@@ -104,7 +104,7 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
   do
   {
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
-    while(temp != "SIZE"){
+    while(temp->sym != "TK_SIZE"){
       temp = temp->rightSib;
     }
     jaggDecStmt->t->j2->range1[x] = (atoi)temp->rightSib->lexeme;
@@ -129,7 +129,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
   do
   {
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
-    while(temp != "SIZE"){
+    while(temp->sym != "TK_SIZE"){
       temp = temp->rightSib;
     }
     jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*((atoi)temp->rightSib->lexeme)+1);
