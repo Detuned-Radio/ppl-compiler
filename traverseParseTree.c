@@ -28,10 +28,13 @@ void processDecStmt(TreeNode* decStmt) {
     processRectDecStmt(decStmt -> leftChild); //pending: variable 
   } else if(decStmt -> leftChild -> leftChild -> sym == "JAGGARR2D_DECLARATION_STMT") {
     decStmt -> leftChild -> tag = 2;  // setting tag to jagg2
-    processJagg2DDecStmt(decStmt -> leftChild);
+    processJagg2DDecStmt(decStmt-> leftChild->leftChild);
+      decStmt-> leftChild->typeExp = decStmt-> leftChild->leftChild->TypeExp;
   } else if(decStmt -> leftChild -> leftChild -> sym == "JAGGARR3D_DECLARATION_STMT") {
     decStmt -> leftChild -> tag = 3;  // setting tag to jagg3
-    processJagg3DDecStmt(decStmt -> leftChild);
+    processJagg3DDecStmt(decStmt -> leftChild->leftChild);
+      decStmt-> leftChild->typeExp = decStmt-> leftChild->leftChild->TypeExp;
+
   }
   // copy to decStmt
   decStmt -> tag = decStmt -> leftChild -> tag;
@@ -84,6 +87,75 @@ void processRectDecStmt(TreeNode* rectDecStmt){
   rectDecStmt -> t -> r -> range[x][1] = rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib;
 
 }
+
+void processJagg2DDecStmt(TreeNode * jaggDecStmt){
+   TreeNode * range = jaggDecStmt->leftChild;
+   while(range->sym!= "RANGE")
+    range = range->rightSib;
+
+  jaggDecStmt->t->j2->range0[0] = range->leftChild -> rightSib;
+  jaggDecStmt->t->j2->range0[1] =  range-> leftChild -> rightSib -> rightSib -> rightSib;
+
+  int numRows = range0[1]-range0[0]+1;
+  jaggDecStmt->t->j2->range1 = (int*) malloc(sizeof(int)* numRows);
+
+  TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR2D_INIT_LIST
+  int x = 0;
+  do
+  {
+    TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
+    while(temp != "SIZE"){
+      temp = temp->rightSib;
+    }
+    jaggDecStmt->t->j2->range1[x] = (atoi)temp->rightSib->lexeme;
+    x++;
+    init = init->rightChild;
+  }while(init->leftChild != init->rightChild);
+}
+
+void processJagg3DDecStmt(TreeNode * jaggDecStmt){
+  TreeNode * range = jaggDecStmt->leftChild;
+  while(range->sym!= "RANGE")
+   range = range->rightSib;
+
+  jaggDecStmt->t->j3->range0[0] = range->leftChild -> rightSib;
+  jaggDecStmt->t->j3->range0[1] =  range-> leftChild -> rightSib -> rightSib -> rightSib;
+
+  int numRows = range0[1]-range0[0]+1;
+  jaggDecStmt->t->j3->range1 = (int**) malloc(sizeof(int*) * numRows);
+
+  TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR3D_INIT_LIST
+  int x = 0;
+  do
+  {
+    TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
+    while(temp != "SIZE"){
+      temp = temp->rightSib;
+    }
+    jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*((atoi)temp->rightSib->lexeme)+1); 
+    jaggDecStmt->t->j2->range1[x][0] = ((atoi)temp->rightSib->lexeme); //size of row list stored at first place
+    TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
+    int y=0;
+    int a=1;
+    do
+    {
+      TreeNode* temp3=temp2->leftChild;//temp3 = JAGGARR3D_VAL_LIST
+      do{
+        y++;
+        temp3=temp3->rightChild;
+      }
+      while(temp3->leftChild !=temp3->rightChild)
+
+      jaggDecStmt->t->j2->range1[x][a] = y;
+      a++;
+      temp2 = temp2->rightChild;
+
+    }while(temp2->leftChild != temp2->rightChild);
+    x++;
+    init = init->rightChild;
+  }while(init->leftChild != init->rightChild);
+}
+
 
 void propagateTypeExp(TreeNode* node) {
   // if identifier, add entry to TypeExpTable
@@ -190,7 +262,40 @@ void processArrayVariable(TreeNode* arrVar) {
   }
 }
 
+void getTypeExp(TreeNode* id, TypeExpTable* table) {
+  while(table) {
+    if(strcmp(id -> lexeme, table -> identifier) == 0)
+      break;
+    table = table -> next;
+  }
+  if(table == NULL) {
+    print("Type expression table entry missing for %s.", id -> lexeme);
+    return;
+  }
+  id -> tag = table -> tag;
+  id -> t = t;
+  return;
+}
 
-getTypeExp
-equalTypeExp
-checkOperands
+bool equalTypeExp(TypeExp a, typeExpTag atag, TypeExp b, typeExpTag btag) {
+  if(atag != btag) return false;
+  if(atag == 0) {
+    return (a -> p -> primitiveType == b -> p -> primitiveType);
+  } else if(atag == 1) {
+    if(a -> r -> dimensions != b -> r -> dimensions)
+      return false;
+    for(int i = 0; i < a -> r -> dimensions; i++)
+      for(int j = 0; j <= 1; j++)
+        if(a -> r -> range[i][j] != b -> r -> range[i][j])
+          return false;
+    return true;
+  } else if(atag == 2) {
+    for(int j = 0; j <= 1; j++)
+      if(a -> j2 -> range0[j] != b -> j2 -> range0[j])
+        return false;
+    for(int i = 0; i < ((a -> j2 -> range)[1] - (a -> j2 -> range)[0] + 1); i++)
+      if(a -> j2 -> range1[i] != b -> j2 -> range1[i])
+        return false;
+    return true;
+  }
+}

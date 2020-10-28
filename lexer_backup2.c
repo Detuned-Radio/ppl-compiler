@@ -156,37 +156,27 @@ TokenList* tokeniseSourcecode(FILE *fptr){
   head = (TokenList*)malloc(sizeof(TokenList));
   TokenList *temp = NULL;
   char codeBuffer[CODE_BUFF_SIZE];
-  int cnt=0;
   while(fgets(codeBuffer, CODE_BUFF_SIZE, fptr)) {
     int clen = strlen(codeBuffer);
     int cptr = 0;
 
-
-
-  cnt++;
-  if(clen>0 &&codeBuffer[clen-1]=='\n')
-  clen=clen-1;
+    if(clen == 1 && isspace(codeBuffer[0])) {
+         continue;
+    }
 
     while(cptr < clen) {
-
       if(temp) {
         temp -> next = (TokenList*) malloc(sizeof(TokenList));
         temp = temp -> next;
       } else {
         head = temp = (TokenList*) malloc(sizeof(TokenList));
       }
-      sscanf(codeBuffer + cptr, "%s", temp->lexeme);
-      int i=0;
-      while(codeBuffer[i+cptr]!=temp->lexeme[0]){
-        i++;
-      }
-
-      cptr += strlen(temp -> lexeme)+i+1;
+      sscanf(codeBuffer + cptr, "%s", temp -> lexeme);
+      cptr += strlen(temp -> lexeme) + 1;
       temp -> line_no = line_no;
       temp -> token = getTokenName(temp -> lexeme, false, NULL);
     }
     line_no++;
-    //fgetc(fptr);
     if(feof(fptr))
       break;
   }
