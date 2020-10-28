@@ -24,7 +24,7 @@ struct jagg2_t {
   int* range1; //[]
 };
 struct jagg3_t {
-  int range0[2]; 
+  int range0[2];
   int** range1; //[][]
 };
 
@@ -60,6 +60,6 @@ struct TreeNode {
 
 TreeNode* createNode(char* sym, bool isTerminal);
 void addChild(TreeNode* parent, TreeNode* child);
-void deleteAllChildren(TreeNode* parent);
+void deleteAllChildren(TreeNode* p);
 
 #endif

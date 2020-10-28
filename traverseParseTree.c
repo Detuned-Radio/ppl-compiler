@@ -25,7 +25,7 @@ void processDecStmt(TreeNode* decStmt) {
     processPrimDecStmt(decStmt -> leftChild);
   } else if(decStmt -> leftChild -> sym == "RECTARR_DECLARATION_STMT") {
     decStmt -> leftChild -> tag = 1;  // setting tag to rect
-    processRectDecStmt(decStmt -> leftChild); //pending: variable 
+    processRectDecStmt(decStmt -> leftChild); //pending: variable
   } else if(decStmt -> leftChild -> leftChild -> sym == "JAGGARR2D_DECLARATION_STMT") {
     decStmt -> leftChild -> tag = 2;  // setting tag to jagg2
     processJagg2DDecStmt(decStmt-> leftChild->leftChild);
@@ -132,7 +132,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
     while(temp != "SIZE"){
       temp = temp->rightSib;
     }
-    jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*((atoi)temp->rightSib->lexeme)+1); 
+    jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*((atoi)temp->rightSib->lexeme)+1);
     jaggDecStmt->t->j2->range1[x][0] = ((atoi)temp->rightSib->lexeme); //size of row list stored at first place
     TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
     int y=0;
@@ -258,7 +258,7 @@ void processArrayVariable(TreeNode* arrVar) {
   } else if(arrTag == 2) {
 
   } else if(arrTag == 3) {
-    
+
   }
 }
 
