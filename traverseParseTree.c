@@ -176,14 +176,14 @@ void populateTable(TreeNode* root , TypeExpTable* head){
     if(iter->leftChild->rightSib->sym == "TK_LIST"){
       TreeNode* it = iter->rightChild->leftSib->leftChild; //id_list
       do{
-        popu->identifier = strcpy(head->identifier,it->leftChild->lexeme);
+        popu->identifier = strcpy(popu->identifier,it->leftChild->lexeme);
         popu->t = it->t;
         popu = popu->next;
         it = it->rightChild;
       }while(it->leftChild != it->rightChild)
     }
     else if(iter->leftChild->rightSib->sym == "ID"){
-      popu->identifier = strcpy(head->identifier,iter->leftChild->rightSib->lexeme);
+      popu->identifier = strcpy(popu->identifier,iter->leftChild->rightSib->lexeme);
       popu->t = iter->t;
       popu = popu->next;
     }
