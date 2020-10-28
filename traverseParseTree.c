@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
 #include "grammar.h"
@@ -7,6 +8,8 @@
 #include "stack.h"
 #include "Tree.h"
 #include "parser.h"
+
+void traverseParseTree()
 
 TypeExpTable* traverseDecList(TreeNode* root) {
     TreeNode* programBody = root -> rightChild -> leftSib;
@@ -184,7 +187,7 @@ void traverseAsgList(TreeNode* root, TypeExpTable* table) {
 
 void processAsgStmt(TreeNode* asgStmt){
   processExpression(asgStmt -> rightChild -> leftSib);
-  getTypeExp(asgStmt -> leftChild);
+  if(asgStmt -> leftChild -> sym == "ID" )
   TypeExp lhs = asgStmt -> leftChild -> t;
   typeExpTag lhsTag = asgStmt -> leftChild -> tag;
   TypeExp rhs = asgStmt -> rightChild -> leftSib -> t;
@@ -209,7 +212,7 @@ void processExpression(TreeNode* expr) {
       return;
     }
   }
-  if(expr -> rightChild -> sym == "SQ_CL") {
+  if(isArrayVariable(expr)) {
     processArrayVariable(expr);
     return;
   }
@@ -225,40 +228,134 @@ void processExpression(TreeNode* expr) {
   typeExpTag lhsTag = expr -> leftChild -> tag;
   TypeExp rhs = expr -> rightChild -> leftSib -> t;
   typeExpTag rhsTag = aexpr -> rightChild -> leftSib -> tag;
-  char* operator = expr -> leftChild -> rightSib;
-  if(checkOperands(lhs, lhsTag, sym, rhs, rhsTag)) {
-    expr -> t = expr -> leftChild -> t;
-    expr -> tag = expr -> leftChild -> tag;
+  char* operator = expr -> leftChild -> rightSib -> sym;
+  if(checkOperands(lhs, lhsTag, operator, rhs, rhsTag)) {
+      if(operator == "TK_DIV") {
+        // always evaluates to real
+        expr -> tag = 0;
+        expr -> t -> p -> primitiveType = 1; 
+      } else {
+        expr -> t = expr -> leftChild -> t;
+        expr -> tag = expr -> leftChild -> tag;
+      }
     return;
   } else {
     printf("ERROR");
   }
 }
 
+bool isArrayVariable(TreeNode* node) {
+  if(node -> leftChild -> sym == "ID" &&
+     node -> leftChild -> rightSib -> sym == "SQ_OP" &&
+     node -> leftChild -> rightSib -> rightSib -> rightSib -> sym == "SQ_CL" &&
+     node -> leftChild -> rightSib -> rightSib -> rightSib -> rightSib == NULL)
+    return true;
+  return false;
+}
+
 void processArrayVariable(TreeNode* arrVar) {
   getTypeExp(arrVar -> leftChild);
   TypeExp arr = arrVar -> leftChild -> t;
-  typeExpTag arrTag = arrVar - >leftChild -> tag;
+  typeExpTag arrTag = arrVar -> leftChild -> tag;
   TreeNode* indexList = arrVar -> rightChild -> leftSib;
+  bool dynamic = false;
   if(arrTag == 1) {
     int dimensions = arr -> r -> dimensions;
+    bool pass = true;
     while(indexList -> leftChild != indexList -> rightChild) {
-      if(dimensions <= 0)
+      if(dimensions <= 0) {
+        pass = false;
         break;
+      }
       dimensions--;
       int index = atoi(indexList -> leftChild -> leftChild -> lexeme);
-      if(index >= arr -> r -> range[dimensions][0] && index <= arr -> r -> range[dimensions][1]) {
-        arrVar -> tag = 0;
-        arrVar -> t -> p -> primitiveType = 0;
-        return;
-      } else {
-        printf("ERROR");
+      bool isLiteral = true;
+      if(index == 0) {
+        for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++) 
+          if(!isdigit(indexList -> leftChild -> leftChild -> lexeme[i]))
+            isLiteral = false;
+      }
+      if(isLiteral && (!(index >= arr -> r -> range[dimensions][0] && index <= arr -> r -> range[dimensions][1]))) {
+        pass = false;
+        break;
       }
     }
+    if(pass) {
+      arrVar -> tag = 0;
+      arrVar -> t -> p -> primitiveType = 0;
+    } else {
+      printf("ERROR: Indexing error");
+    }
   } else if(arrTag == 2) {
+    int index0 = atoi(indexList -> leftChild -> leftChild -> lexeme);
+    int index1 = atoi(indexList -> rightChild -> leftChild -> leftChild -> lexeme);
+    if(indexList -> rightChild -> leftChild != indexList -> rightChild -> rightChild) {
+      printf("ERROR: Indexing error (dimension mismatch)");
+      return;
+    }
+    bool isLiteral0 = true;
+    if(index0 == 0) {
+      for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++) 
+        if(!isdigit(indexList -> leftChild -> leftChild -> lexeme[i]))
+          isLiteral0 = false;
+    }
+    bool isLiteral1 = true;
+    if(index1 == 0) {
+      for(int i = 0; i < strlen(indexList -> rightChild -> leftChild -> leftChild -> lexeme); i++) 
+        if(!isdigit(indexList -> rightChild -> leftChild -> leftChild -> lexeme[i]))
+          isLiteral1 = false;
+    }
+    int low0 = arr -> j2 -> range0[0];
+    int high0 = arr -> j2 -> range0[1];
+    int size1 = arr -> j2 -> range1[index0 - low0];
+    bool pass = (!isLiteral0 || ((index0 >= low0) && (index0 <= high0))) && 
+                (!isLiteral1 || (index1 < size1));
+    if(pass) {
+      arrVar -> tag = 0;
+      arrVar -> t -> p -> primitiveType = 0;
+    } else {
+      printf("ERROR: Indexing error")
+    }
 
   } else if(arrTag == 3) {
-    
+    int index0 = atoi(indexList -> leftChild -> leftChild -> lexeme);
+    int index1 = atoi(indexList -> rightChild -> leftChild -> leftChild -> lexeme);
+    int index2 = atoi(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme);
+    if(indexList -> rightChild -> rightChild -> leftChild != indexList -> rightChild -> rightChild -> rightChild) {
+      printf("ERROR: Indexing error (dimension mismatch)");
+      return;
+    }
+    bool isLiteral0 = true;
+    if(index0 == 0) {
+      for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++) 
+        if(!isdigit(indexList -> leftChild -> leftChild -> lexeme[i]))
+          isLiteral0 = false;
+    }
+    bool isLiteral1 = true;
+    if(index1 == 0) {
+      for(int i = 0; i < strlen(indexList -> rightChild -> leftChild -> leftChild -> lexeme); i++) 
+        if(!isdigit(indexList -> rightChild -> leftChild -> leftChild -> lexeme[i]))
+          isLiteral1 = false;
+    }
+    bool isLiteral2 = true;
+    if(index2 == 0) {
+      for(int i = 0; i < strlen(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme); i++) 
+        if(!isdigit(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme[i]))
+          isLiteral2 = false;
+    }
+    int low0 = arr -> j3 -> range0[0];
+    int high0 = arr -> j3 -> range0[1];
+    int size1 = arr -> j3 -> range1[index0][0];
+    int size2 = arr -> j3 -> range1[index0][index1 + 1];
+    bool pass = (!isLiteral0 || ((index0 >= low0) && (index0 <= high0))) && 
+                (!isLiteral1 || (index1 < size1)) &&
+                (!isLiteral2 || (index2 < size2));
+    if(pass) {
+      arrVar -> tag = 0;
+      arrVar -> t -> p -> primitiveType = 0;
+    } else {
+      printf("ERROR: Indexing error")
+    }
   }
 }
 
@@ -273,7 +370,7 @@ void getTypeExp(TreeNode* id, TypeExpTable* table) {
     return;
   }
   id -> tag = table -> tag;
-  id -> t = t;
+  id -> t = table -> t;
   return;
 }
 
@@ -293,9 +390,69 @@ bool equalTypeExp(TypeExp a, typeExpTag atag, TypeExp b, typeExpTag btag) {
     for(int j = 0; j <= 1; j++)
       if(a -> j2 -> range0[j] != b -> j2 -> range0[j])
         return false;
-    for(int i = 0; i < ((a -> j2 -> range)[1] - (a -> j2 -> range)[0] + 1); i++)
+    for(int i = 0; i < ((a -> j2 -> range0)[1] - (a -> j2 -> range0)[0] + 1); i++)
       if(a -> j2 -> range1[i] != b -> j2 -> range1[i])
         return false;
     return true;
+  } else {
+    for(int j = 0; j <= 1; j++)
+      if(a -> j3 -> range0[j] != b -> j3 -> range0[j])
+        return false;
+    for(int i = 0; i < ((a -> j3 -> range0)[1] - (a -> j3 -> range0)[0] + 1); i++)
+      if(a -> j3 -> range1[i][0] != b -> j3 -> range1[i][0])
+        return false;
+      for(int j = 1; j <= range1[i][0]; j++)
+        if(a -> j3 -> range1[i][j] != b -> j3 -> range1[i][j])
+          return false;
+      return true;
+  }
+}
+
+bool checkOperands(TypeExp a, typeExpTag atag, char* op, TypeExp b, typeExpTag btag) {
+  if(atag != btag)
+    return false;
+  // allow division of arrays?
+  if(op == "TK_PLUS" || op == "TK_MINUS" || op == "TK_STAR") {
+    if(atag == 0) {
+      if(a -> p -> primitiveType == 0 || a -> p -> primitiveType == 1)
+        return true;
+      else {
+        printf("ERROR: Cannot apply arithmetic opertors on booleans.");
+        return false;
+      }
+    } else {
+      if(equalTypeExp(a, atag, b, btag))
+        return true;
+      else {
+        printf("ERROR: Size mismatch")
+        return false;
+      }
+    }
+  } else if(op == "TK_DIV") {
+    if(atag == 0) {
+      if(a -> p -> primitiveType == 0 || a -> p -> primitiveType == 1)
+        return true;
+      else {
+        printf("ERROR: Cannot apply arithmetic opertors on booleans.");
+        return false;
+      }
+    } else {
+      printf("ERROR: Elementwise division (Arrays of real type) not supported.")
+      return false;
+    }
+  } else if(op == "TK_AND" || op == "TK_OR") {
+    if(atag == 0) {
+      if(a -> p -> primitiveType == 2)
+        return true;
+      else {
+        printf("ERROR: Cannot apply logical opertors on non-boolean types.");
+        return false;
+      }
+    } else {
+      printf("ERROR: Elementwise logical operations not supported.")
+      return false;
+    }
+  } else {
+    printf("ERROR: Invalid operator.\n");
   }
 }
