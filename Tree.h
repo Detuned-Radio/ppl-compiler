@@ -40,6 +40,7 @@ struct TypeExpTable {
   typeExpTag tag;
   statDynTag statDyn;
   TypeExp t;
+  TypeExpTable* next;
 };
 
 struct TreeNode {
