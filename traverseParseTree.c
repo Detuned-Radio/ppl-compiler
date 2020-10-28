@@ -81,23 +81,24 @@ void processRectDecStmt(TreeNode* rectDecStmt){
   // assigning values to ranges
   int x = 0;
   while(rangeList-> leftChild != rangeList -> rightChild){
-      rectDecStmt -> t -> r -> range[x][0] = rangeList -> leftChild -> leftChild -> rightSib;  //range list - ->  range - ->  second child gives first subscript of range
-      rectDecStmt -> t -> r -> range[x][1] = rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib;  //range list - ->  range - ->  second child gives second subscript of range
+      // only constant lower and upper bounds supported right now
+      rectDecStmt -> t -> r -> range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives range_val -> id or constant
+      rectDecStmt -> t -> r -> range[x][1] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives second subscript of range
       rangeList = rangeList -> rightChild;
       x++;
   }
-  rectDecStmt -> t -> r -> range[x][0] = rangeList -> leftChild -> leftChild -> rightSib;
-  rectDecStmt -> t -> r -> range[x][1] = rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib;
+  rectDecStmt -> t -> r -> range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives 
+  rectDecStmt -> t -> r -> range[x][1] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives second subscript of range
 
 }
 
 void processJagg2DDecStmt(TreeNode * jaggDecStmt){
-   TreeNode * range = jaggDecStmt->leftChild;
-   while(range->sym!= "RANGE")
+  TreeNode * range = jaggDecStmt->leftChild;
+  while(range->sym!= "RANGE")
     range = range->rightSib;
 
-  jaggDecStmt->t->j2->range0[0] = range->leftChild -> rightSib;
-  jaggDecStmt->t->j2->range0[1] =  range-> leftChild -> rightSib -> rightSib -> rightSib;
+  jaggDecStmt->t->j2->range0[0] = atoi(range -> leftChild -> rightSib -> leftChild -> lexeme);
+  jaggDecStmt->t->j2->range0[1] = atoi(range -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
 
   int numRows = range0[1]-range0[0]+1;
   jaggDecStmt->t->j2->range1 = (int*) malloc(sizeof(int)* numRows);
@@ -110,7 +111,7 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
     while(temp->sym != "TK_SIZE"){
       temp = temp->rightSib;
     }
-    jaggDecStmt->t->j2->range1[x] = (atoi)temp->rightSib->lexeme;
+    jaggDecStmt->t->j2->range1[x] = atoi(temp->rightSib->lexeme);
     x++;
     init = init->rightChild;
   }while(init->leftChild != init->rightChild);
@@ -121,27 +122,34 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
   while(range->sym!= "RANGE")
    range = range->rightSib;
 
-  jaggDecStmt->t->j3->range0[0] = range->leftChild -> rightSib;
-  jaggDecStmt->t->j3->range0[1] =  range-> leftChild -> rightSib -> rightSib -> rightSib;
+  jaggDecStmt->t->j3->range0[0] = atoi(range -> leftChild -> rightSib -> leftChild -> lexeme);
+  jaggDecStmt->t->j3->range0[1] = atoi(range -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
 
   int numRows = range0[1]-range0[0]+1;
   jaggDecStmt->t->j3->range1 = (int**) malloc(sizeof(int*) * numRows);
 
   TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR3D_INIT_LIST
   int x = 0;
+  bool pass1 = true;
+  bool pass2 = true;
   do
   {
+    if(init->leftChild != init->rightChild)
+      pass1 = false;
+
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
     while(temp->sym != "TK_SIZE"){
       temp = temp->rightSib;
     }
-    jaggDecStmt->t->j2->range1[x] = (int*)malloc(sizeof(int)*((atoi)temp->rightSib->lexeme)+1); 
-    jaggDecStmt->t->j2->range1[x][0] = ((atoi)temp->rightSib->lexeme); //size of row list stored at first place
+    jaggDecStmt->t->j2->range1[x] = (int*) malloc(sizeof(int)*(atoi(temp->rightSib->lexeme)+1)); 
+    jaggDecStmt->t->j2->range1[x][0] = atoi(temp->rightSib->lexeme); //size of row list stored at first place
     TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
     int y=0;
     int a=1;
     do
     {
+      if(temp2->leftChild != temp2->rightChild)
+        pass2 = false;
       TreeNode* temp3=temp2->leftChild;//temp3 = JAGGARR3D_VAL_LIST
       do{
         y++;
@@ -149,19 +157,19 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       }
       while(temp3->leftChild !=temp3->rightChild)
 
-      jaggDecStmt->t->j2->range1[x][a] = y;
+      jaggDecStmt->t->j2->range1[x][a] = y + 1;
       a++;
       temp2 = temp2->rightChild;
 
-    }while(temp2->leftChild != temp2->rightChild);
+    }while(pass2);
+
     x++;
     init = init->rightChild;
-  }while(init->leftChild != init->rightChild);
+  }while(pass1);
 }
 
 
 void propagateTypeExp(TreeNode* node) {
-  // if identifier, add entry to TypeExpTable
   node -> t = node -> parent -> t;
   node -> tag = node -> parent -> tag;
   TreeNode* child = node -> leftChild;
