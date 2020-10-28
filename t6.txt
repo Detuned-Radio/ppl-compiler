@@ -21,7 +21,7 @@ program ( )
 	R1 [ 6 ]  : size 4 : values { 67 ; 91 ; 13 ; 44 }
 	R1 [ 7 ]  : size 1 : values { 17 }
 	R1 [ 8 ]  : size 5 : values { 31 ; 97 ; 10 ; 9 ; 120 }
-	declare list of variables p1 p2 p3 : jagged array [ 105 ..  107 ] [ ] of integer ; 
+	declare list of variables p1 p2 p3 : jagged array [ 105 ..  107 ] [ ] [ ] of integer ; 
 	R1 [ 105 ]  : size 4 : values { 20  21  33 ; 102 ; 35 ; 54 }     
 	R1 [ 106 ]  : size 3 : values { 165 ; 809 ; 929 }
 	R1 [ 107 ]  : size 2 : values { 22 ; 745 }
@@ -37,13 +37,13 @@ program ( )
 	c1 = c2 + c1 ;
 	c2 = a1 /  a2 ;                 
 	c1 = a1 * a2 ;                  
-	h1 = s2 + s3 * u – h2 * h3 ;    
+	h1 = s2 + s3 * u - h2 * h3 ;    
 	u [ 2 5 ]  = v [ 3 4 ] + v1 ;     
 	u [ 3 7 ]   = v [ 3 5 ] - new ;     	
 	u = v + u ;			
-	h1 = s4 – s5 * s6 ;         
+	h1 = s4 - s5 * s6 ;         
 	s1 = s2 + s3 * s1  ;	 	
-	h1 = h2 + h3 * h1 – h2 * h3 ;   
+	h1 = h2 + h3 * h1 - h2 * h3 ;   
 	s1 = s2 + s4 * s6 ;    
 	q1 = q2 + q3 ;  	
 }
