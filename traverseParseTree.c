@@ -162,7 +162,7 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
   int numRows = jaggDecStmt->t.j2.range0[1] - jaggDecStmt->t.j2.range0[0] + 1;
   jaggDecStmt->t.j2.range1 = (int*) malloc(sizeof(int)* numRows);
 
-  boolean flag=true;
+  bool flag=true;
   TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR2D_INIT_LIST
   int x = 0;
   do
