@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
 			FILE* fptr=fopen(argv[1], "r");
 		    TokenList* tokenStream=tokeniseSourcecode(fptr);
 		    fclose(fptr);
-
+		    // printTokenStream(tokenStream);
+		    
 		    // create parse tree
 		    root = createParseTree(grammar, tokenStream);
 

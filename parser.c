@@ -137,13 +137,13 @@ void printPreOrder(TreeNode* node, Rule* grammar) {
 	else
 		printf("%-10s", "NO");
 	if(!(node -> isTerminal) && (node -> tag != 4))
-		printf("%-25s", printTypeExp(node -> t, node -> tag));
+		printf("%-130s", printTypeExp(node -> t, node -> tag));
+	else
+		printf("%-130s", "***");
+	if(node -> isTerminal)
+		printf("%-25s", node -> lexeme);
 	else
 		printf("%-25s", "***");
-	if(node -> isTerminal)
-		printf("%-15s", node -> lexeme);
-	else
-		printf("%-15s", "***");
 	if(node -> isTerminal)
 		printf("%-12d", node -> line_no);
 	else
@@ -164,8 +164,10 @@ void printPreOrder(TreeNode* node, Rule* grammar) {
 }
 
 void printParseTree(TreeNode* root, Rule* grammar) {
-	printf("SYMBOL                      TERMINAL  TYPE EXPR                LEXEME         LINE NUMBER GRAMMAR RULE  DEPTH\n");//28 10 25 15 12 14 5
-	printf("-------------------------------------------------------------------------------------------------------------\n");
+	printf("%-28s%-10s%-130s%-25s%-12s%-14s%-5s\n", "SYMBOL", "TERMINAL", "TYPE EXPRESSION", "LEXEME", "LINE NUM", "GRAMMAR RULE", "DEPTH");
+	for(int i = 0; i < 225; i++)
+		printf("-");
+	printf("\n");
 	printPreOrder(root, grammar);
 	return;
 }
