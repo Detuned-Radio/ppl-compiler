@@ -194,11 +194,15 @@ void populateTable(TreeNode* root , TypeExpTable* head){
   TreeNode* temp = root->rightChild->leftSib->leftChild; //DECLARATION_lIST
   do{
     TreeNode* iter = temp->leftChild->leftChild; //TYPE_DECLARATION_STMT
+    if(iter->sym == "JAGGARR_DECLARATION_STMT")
+      iter = iter->leftChild;
+    
     if(strcmp(iter->leftChild->rightSib->sym, "TK_LIST")==0) {
       TreeNode* it = iter->leftChild->rightSib->rightSib->rightSib->rightSib; //id_list
       do{
         strcpy(popu->identifier,it->leftChild->lexeme);
         popu->t = it->t;
+        popu->tag = it->tag;
         popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
         popu = popu->next;
         it = it->rightChild;
@@ -206,6 +210,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
     } else if(strcmp(iter->leftChild->rightSib->sym, "ID")==0){
       strcpy(popu->identifier,iter->leftChild->rightSib->lexeme);
       popu->t = iter->t;
+      popu->tag = iter->tag;
       popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
       popu = popu->next;
     }
