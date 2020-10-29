@@ -368,7 +368,7 @@ char* printTypeExp(TypeExp t, typeExpTag tag) {
     strcat(ans,"basicElementType=integer>");
   } else if(tag==2){
     char trial[5];
-    strcat(ans,"<type=rectangularArray, dimensions=2, range_R1=(");
+    strcat(ans,"<type=jaggedArray, dimensions=2, range_R1=(");
     sprintf(trial,"%d",t.j2.range0[0]);
     strcat(ans,trial);
     strcat(ans,", ");
@@ -383,9 +383,9 @@ char* printTypeExp(TypeExp t, typeExpTag tag) {
       else
       strcat(ans,",");
     }
-  } else { //tag==3!
+  } else if(tag==3) { //tag==3!
     char trial[5];
-    strcat(ans,"<type=rectangularArray, dimensions=3, range_R1=(");
+    strcat(ans,"<type=jaggedArray, dimensions=3, range_R1=(");
     sprintf(trial,"%d",t.j3.range0[0]);
     strcat(ans,trial);
     strcat(ans,", ");
@@ -406,9 +406,11 @@ char* printTypeExp(TypeExp t, typeExpTag tag) {
         else
         strcat(ans,",");
       }
-    }
+    } 
     strcat(ans,"),basicElementType = integer>");
 
+  } else {
+    strcat(ans, "***");
   }
   return ans;
 }
@@ -427,7 +429,11 @@ void traverseAsgList(TreeNode* root, TypeExpTable* table) {
 
 void processAsgStmt(TreeNode* asgStmt, TypeExpTable* table){
   processExpression(asgStmt -> rightChild -> leftSib, table);
-  getTypeExp(asgStmt -> leftChild, table);
+  if(strcmp(asgStmt -> leftChild -> sym, "ARR_ID") == 0)  {
+    processArrayVariable(asgStmt -> leftChild, table);
+  } else {
+    getTypeExp(asgStmt -> leftChild, table);
+  }
   TypeExp lhs = asgStmt -> leftChild -> t;
   typeExpTag lhsTag = asgStmt -> leftChild -> tag;
   TypeExp rhs = asgStmt -> rightChild -> leftSib -> t;
@@ -458,7 +464,7 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
     }
     return;
   }
-  if(isArrayVariable(expr)) {
+  if(strcmp(expr -> sym, "ARR_ID")==0) {
     processArrayVariable(expr, table);
     return;
   }
@@ -472,6 +478,10 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
   processExpression(expr -> rightChild, table);
   TreeNode* lhs = expr -> leftChild;
   TreeNode* rhs = expr -> rightChild;
+  if(lhs -> tag == 4 || rhs -> tag == 4) {
+    expr -> tag = 4;
+    return;
+  }
   char* operator = expr -> leftChild -> rightSib -> sym;
   if(checkOperands(lhs, operator, rhs)) {
       if(strcmp(operator, "TK_DIV")==0) {
@@ -483,6 +493,8 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
         expr -> tag = expr -> leftChild -> tag;
       }
     return;
+  } else {
+    expr -> tag = 4;
   }
 }
 
@@ -652,7 +664,7 @@ bool equalTypeExp(TypeExp a, typeExpTag atag, TypeExp b, typeExpTag btag) {
       if(a.j2.range1[i] != b.j2.range1[i])
         return false;
     return true;
-  } else {
+  } else if(atag == 3) {
     for(int j = 0; j <= 1; j++)
       if(a.j3.range0[j] != b.j3.range0[j])
         return false;
@@ -751,8 +763,9 @@ void printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNo
 
   char* lhs_lexeme = NULL;
   char* lhs_type = NULL;
+
   if(lhs) {
-    lhs_lexeme = lhs -> lexeme;
+    lhs_lexeme = getLexeme(lhs);
     lhs_type = printTypeExp(lhs -> t, lhs -> tag);
   } else {
     lhs_lexeme = "***";
@@ -761,12 +774,16 @@ void printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNo
   char* rhs_lexeme = NULL;
   char* rhs_type = NULL;
   if(rhs) {
-    rhs_lexeme = rhs -> lexeme;
+    if(strcmp(op, "TK_EQUALS")!=0)
+      rhs_lexeme = getLexeme(rhs);
+    else
+      rhs_lexeme = "***";
     rhs_type = printTypeExp(rhs -> t, rhs -> tag);
   } else {
     rhs_lexeme = "***";
     rhs_type = "***";
   }
+
   printf("%-10d%-15s%-10s%-20s%-30s%-20s%-30s%-8d%s\n", line_no, cat_str, op_str,
                                                         lhs_lexeme, lhs_type,
                                                         rhs_lexeme, rhs_type,
@@ -778,4 +795,10 @@ int getLineNum(TreeNode* node) {
   while(node -> leftChild)
     node = node -> leftChild;
   return node -> line_no;
+}
+
+char* getLexeme(TreeNode* node) {
+  while(node -> leftChild)
+    node = node -> leftChild;
+  return node -> lexeme;
 }
