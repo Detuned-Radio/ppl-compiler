@@ -223,10 +223,10 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
     int num_rowLists=jaggDecStmt->t.j3.range1[x][0];
     
     TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
-    int y=0;
     int a=1;
     do
     {
+      int y = 0;
       if(temp2->leftChild != temp2->rightChild)
         pass2 = false;
       TreeNode* temp3=temp2->leftChild;//temp3 = JAGGARR3D_VAL_LIST
@@ -375,11 +375,19 @@ char* printTypeExp(TypeExp t, typeExpTag tag) {
       sprintf(trial,"%d",i);
       strcat(ans,trial);
       strcat(ans,"=(");
-      sprintf(trial,"%d",t.r.range[i-1][0]);
-      strcat(ans,trial);
+      if(t.r.dynRange[i-1][0] == NULL) {
+        sprintf(trial,"%d",t.r.range[i-1][0]);
+        strcat(ans,trial);
+      } else {
+        strcat(ans, t.r.dynRange[i-1][0]);
+      }
       strcat(ans,",");
-      sprintf(trial,"%d",t.r.range[i-1][1]);
-      strcat(ans,trial);
+      if(t.r.dynRange[i-1][1] == NULL) {
+        sprintf(trial,"%d",t.r.range[i-1][1]);
+        strcat(ans,trial);
+      } else {
+        strcat(ans, t.r.dynRange[i-1][1]);
+      }
       strcat(ans,"), ");
       //printf("range_R%d=(%d, %d), ", i, t.r.range[i-1][0], t.r.range[i-1][1]);
     }

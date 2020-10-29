@@ -1,7 +1,8 @@
 program ( )
 {
-declare list of variables abcd ghd2_1 ssd_2_3 : array [ 2 .. 5 ] of integer ;
+declare list of variables x y : integer ;
+declare list of variables abcd ghd2_1 ssd_2_3 : array [ x .. y ] [ a .. b ] of integer ;
 declare list of variables c1 c2 : real ;	
 c1 = c2 + c1 ;
-abcd = ssd_2_3 + abcd ;
+abcd = ssd_2_3 + c1 ;
 }
