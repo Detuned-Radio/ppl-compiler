@@ -273,7 +273,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
       popu = popu->next;
     }
   } while(temp->leftChild != temp->rightChild);
-  popu->next = NULL;
+  popu = NULL; //check
 }
 
 void printTypeExpressionTable(TypeExpTable* table) {
