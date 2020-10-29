@@ -241,7 +241,11 @@ void propagateTypeExp(TreeNode* node) {
 void populateTable(TreeNode* root , TypeExpTable* head){
   TypeExpTable* popu = head;
   TreeNode* temp = root->rightChild->leftSib->leftChild; //DECLARATION_lIST
+  int flag = 0;
   do{
+      if(flag)
+        temp = temp->rightChild;
+    flag = 1;
     TreeNode* iter = temp->leftChild->leftChild; //TYPE_DECLARATION_STMT
     if(iter->sym == "JAGGARR_DECLARATION_STMT")
       iter = iter->leftChild;
@@ -268,7 +272,6 @@ void populateTable(TreeNode* root , TypeExpTable* head){
       popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
       popu = popu->next;
     }
-    temp = temp->rightChild;
   } while(temp->leftChild != temp->rightChild);
   popu->next = NULL;
 }
