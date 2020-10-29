@@ -203,6 +203,9 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
     }
     jaggDecStmt->t.j3.range1[x] = (int*) malloc(sizeof(int)*(atoi(temp->rightSib->lexeme)+1));
     jaggDecStmt->t.j3.range1[x][0] = atoi(temp->rightSib->lexeme); //size of row list stored at first place
+    
+    int num_rowLists=jaggDecStmt->t.j3.range1[x][0];
+    
     TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
     int y=0;
     int a=1;
@@ -220,9 +223,21 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       jaggDecStmt->t.j3.range1[x][a] = y + 1;
       a++;
       temp2 = temp2->rightChild;
+      
+      num_rowLists--;
+      if(num_rowLists<0)
+      {
+        printError(init->leftChild,false,null,null,null,init->leftChild.depth,"type definition error");
+      }
+      printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg)
 
     }while(pass2);
-
+    
+    if(num_rowLists>0)
+    {
+      printError(init->leftChild,false,null,null,null,init->leftChild.depth,"type definition error");
+    }
+    
     x++;
     init = init->rightChild;
   }while(pass1);
