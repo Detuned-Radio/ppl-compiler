@@ -229,7 +229,6 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       {
         printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
       }
-      // printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg)
 
     }while(pass2);
     
