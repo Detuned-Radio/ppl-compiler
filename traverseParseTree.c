@@ -277,7 +277,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
 }
 
 void printTypeExpressionTable(TypeExpTable* table) {
-  printf("%-22s%-6s%-12s%-30s\n", "VARIABLE NAME", "TYPE", "DYNAMIC", "TYPE EXPRESSION");
+  printf("%-22s%-16s%-12s%-30s\n", "VARIABLE NAME", "TYPE", "DYNAMIC", "TYPE EXPRESSION");
   while(table) {
     printf("%-20s  ", table -> identifier);
     switch(table -> tag) {
