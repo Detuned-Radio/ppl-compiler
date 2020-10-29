@@ -8,7 +8,7 @@ typedef struct rect_t rect_t;
 typedef struct jagg2_t jagg2_t;
 typedef struct jagg3_t jagg3_t;
 typedef union TypeExp TypeExp;
-typedef enum typeExpTag {prim, rect, jagg2, jagg3} typeExpTag;
+typedef enum typeExpTag {prim, rect, jagg2, jagg3, invalid} typeExpTag;
 typedef enum primType {integer, real, boolean} primType;
 typedef enum statDynTag {na, stat, dyn} statDynTag;
 

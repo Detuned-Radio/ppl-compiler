@@ -22,4 +22,5 @@ bool equalTypeExp(TypeExp a, typeExpTag atag, TypeExp b, typeExpTag btag);
 bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs);
 void printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg);
 int getLineNum(TreeNode* node);
+char* getLexeme(TreeNode* node);
 #endif

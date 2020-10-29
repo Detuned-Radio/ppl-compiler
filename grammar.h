@@ -1,6 +1,6 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
-#define NUM_RULES 61
+#define NUM_RULES 62
 
 typedef struct SymList {
 	char* val;

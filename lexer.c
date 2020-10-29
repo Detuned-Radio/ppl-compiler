@@ -73,6 +73,8 @@ char* getTokenName(char str[], bool forGrammar, bool* isTerminal) {
       return "INDEX";
     if(strcmp(str, "BOOL_TERM") == 0)
       return "BOOL_TERM";
+    if(strcmp(str, "ARR_ID") == 0)
+      return "ARR_ID";
     if(isTerminal)
       *isTerminal = true;
     if(strcmp(str, "CONSTANT") == 0)
