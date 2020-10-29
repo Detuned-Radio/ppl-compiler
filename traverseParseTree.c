@@ -717,6 +717,10 @@ bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs) {
     printError(lhs, true, op, lhs, rhs, lhs -> depth, "Operand type mismatch");
     return false;
   }
+  if(atag == 0 && a.p.primitiveType != b.p.primitiveType) {
+    printError(lhs, true, op, lhs, rhs, lhs -> depth, "Operand type mismatch");
+    return false;
+  }
   // allow division of arrays?
   if(strcmp(op, "TK_PLUS")==0 || strcmp(op, "TK_MINUS")==0 || strcmp(op, "TK_STAR")==0) {
     if(atag == 0) {
