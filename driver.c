@@ -11,24 +11,55 @@
 
 
 int main(int argc, char* argv[]) {
-	if(argc != 4) {
-		printf("Usage: ./grammartest <path to grammar txt> <number of rules> <path to source code>\n");
+	if(argc != 2) {
+		printf("Usage: ./driver <path to source code>\n");
 		return 0;
 	}
-	char* grammar_path = argv[1];
-	int num_rules = atoi(argv[2]);
-	Rule* grammar = readGrammar(grammar_path, num_rules);
-	// printGrammar(grammar, num_rules);
+	Rule* grammar;
+	TreeNode* root = NULL;
+	TypeExpTable* table = NULL;
+	while(true) {
+		printf(">> ");
+		int input;
+		scanf("%d", &input);
+		
+		if(input == 0) {
+			break;
+		} else if(input == 1) {
+			// read grammar from grammar.txt
+			char* grammar_path = "grammar.txt";
+			int num_rules = 62;
+			grammar = readGrammar(grammar_path, num_rules);
 
-	FILE* fptr=fopen(argv[3], "r");
-    TokenList* tokenStream=tokeniseSourcecode(fptr);
-    fclose(fptr);
-    // printTokenStream(tokenStream);
+			// tokenise source code to get token stream
+			FILE* fptr=fopen(argv[1], "r");
+		    TokenList* tokenStream=tokeniseSourcecode(fptr);
+		    fclose(fptr);
 
-    TreeNode* root = createParseTree(grammar, tokenStream);
-    printf("parse tree is created successfully\n");
+		    // create parse tree
+		    root = createParseTree(grammar, tokenStream);
 
-    printParseTree(root, grammar);
-
-    traverseParseTree(root);
+	    	printf("Parse tree created successfully.\n");
+		} else if(input == 2) {
+			if(root) {
+				table = traverseParseTree(root);
+			} else {
+				printf("Parse tree yet to be created. Use option 1.\n");
+			}
+		} else if(input == 3) {
+			if(root) {
+				printParseTree(root, grammar);
+			} else {
+				printf("Parse tree yet to be created. Use option 1.\n");
+			}
+		} else if(input == 4) {
+			if(table) {
+				printTypeExpressionTable(table);
+			} else {
+				printf("Type expression table yet to be populated. Use option 2.\n");
+			}
+		} else {
+			printf("Invalid option.\n");
+		}
+	  }
 }

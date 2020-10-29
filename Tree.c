@@ -9,6 +9,7 @@ TreeNode* createNode(char* sym, bool isTerminal) {
   TreeNode* newNode = (TreeNode*) malloc(sizeof(TreeNode));
   newNode -> sym = sym;
   newNode -> isTerminal = isTerminal;
+  newNode -> tag = 4;
   newNode -> parent = NULL;
   newNode -> leftChild = NULL;
   newNode -> rightChild = NULL;

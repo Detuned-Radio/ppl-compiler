@@ -10,15 +10,15 @@
 #include "parser.h"
 #include "traverseParseTree.h"
 
-void traverseParseTree(TreeNode* root) {
-  traverseDecList(root);
-  TypeExpTable* table = (TypeExpTable*) malloc(sizeof(TypeExpTable));
-  populateTable(root, table);
-  printTypeExpressionTable(table);
+TypeExpTable* traverseParseTree(TreeNode* root) {
   printf("ERRORS:\n");
   printf("%-10s%-15s%-10s%-20s%-130s%-20s%-130s%-8s%s\n", "LINE NUM", "CATEGORY", "OPERATOR",
     "LEXEME OP1", "TYPE OP1", "LEXEME OP2", "TYPE OP2", "DEPTH", "MESSAGE");
+  traverseDecList(root);
+  TypeExpTable* table = (TypeExpTable*) malloc(sizeof(TypeExpTable));
+  populateTable(root, table);
   traverseAsgList(root, table);
+  return table;
 }
 
 void traverseDecList(TreeNode* root) {
@@ -318,6 +318,9 @@ void populateTable(TreeNode* root , TypeExpTable* head){
 
 void printTypeExpressionTable(TypeExpTable* table) {
   printf("%-22s%-6s%-16s%-30s\n", "VARIABLE NAME", "TYPE", "DYNAMIC", "TYPE EXPRESSION");
+  for(int i = 0; i < 74; i++)
+    printf("-");
+  printf("\n");
   while(table) {
     printf("%-20s  ", table -> identifier);
     switch(table -> tag) {

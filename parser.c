@@ -129,22 +129,22 @@ void printPreOrder(TreeNode* node, Rule* grammar) {
 		printf("%-10s", "YES");
 	else
 		printf("%-10s", "NO");
-	if(!(node -> isTerminal))
-		printf("%-25s", "NA");
+	if(!(node -> isTerminal) && (node -> tag != 4))
+		printf("%-25s", printTypeExp(node -> t, node -> tag));
 	else
-		printf("%-25s", "-");
+		printf("%-25s", "***");
 	if(node -> isTerminal)
 		printf("%-15s", node -> lexeme);
 	else
-		printf("%-15s", "-");
+		printf("%-15s", "***");
 	if(node -> isTerminal)
 		printf("%-12d", node -> line_no);
 	else
-		printf("%-12s", "-");
+		printf("%-12s", "***");
 	if(!(node -> isTerminal))
 		printf("%-14ld", (node -> r) - grammar + 1);
 	else
-		printf("%-14s", "-");
+		printf("%-14s", "***");
 	printf("%-5d\n", node -> depth);
 
 	TreeNode* curr = node -> leftChild;
@@ -163,25 +163,25 @@ void printParseTree(TreeNode* root, Rule* grammar) {
 	return;
 }
 
-int main(int argc, char* argv[]) {
-	if(argc != 4) {
-		printf("Usage: ./grammartest <path to grammar txt> <number of rules> <path to source code>\n");
-		return 0;
-	}
-	char* grammar_path = argv[1];
-	int num_rules = atoi(argv[2]);
-	Rule* grammar = readGrammar(grammar_path, num_rules);
-	// printGrammar(grammar, num_rules);
+// int main(int argc, char* argv[]) {
+// 	if(argc != 4) {
+// 		printf("Usage: ./grammartest <path to grammar txt> <number of rules> <path to source code>\n");
+// 		return 0;
+// 	}
+// 	char* grammar_path = argv[1];
+// 	int num_rules = atoi(argv[2]);
+// 	Rule* grammar = readGrammar(grammar_path, num_rules);
+// 	// printGrammar(grammar, num_rules);
 	
-	FILE* fptr=fopen(argv[3], "r");
-    TokenList* tokenStream=tokeniseSourcecode(fptr);
-    fclose(fptr);
-    // printTokenStream(tokenStream);
+// 	FILE* fptr=fopen(argv[3], "r");
+//     TokenList* tokenStream=tokeniseSourcecode(fptr);
+//     fclose(fptr);
+//     // printTokenStream(tokenStream);
 
-    TreeNode* root = createParseTree(grammar, tokenStream);
-    printf("parse tree is created successfully\n");
+//     TreeNode* root = createParseTree(grammar, tokenStream);
+//     printf("parse tree is created successfully\n");
 
-    printParseTree(root, grammar);
+//     printParseTree(root, grammar);
 
-    traverseParseTree(root);
-}
+//     traverseParseTree(root);
+// }

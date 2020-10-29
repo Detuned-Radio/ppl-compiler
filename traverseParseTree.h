@@ -1,7 +1,7 @@
 #ifndef TRAVERSE_H
 #define TRAVERSE_H
 
-void traverseParseTree(TreeNode* root);
+TypeExpTable* traverseParseTree(TreeNode* root);
 void traverseDecList(TreeNode* root);
 void processDecStmt(TreeNode* decStmt);
 void processPrimDecStmt(TreeNode* primDecStmt);
