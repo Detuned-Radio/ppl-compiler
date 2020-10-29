@@ -1,3 +1,10 @@
+/*
+Group No.26
+Arshit Modi      2018A7PS0191P
+Devanshu         2018A7PS0194P
+Guntaas Singh    2018A7PS0269P
+Siddarth Agrawal 2018A7PS0359P
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +29,7 @@ int main(int argc, char* argv[]) {
 		printf(">> ");
 		int input;
 		scanf("%d", &input);
-		
+
 		if(input == 0) {
 			break;
 		} else if(input == 1) {
