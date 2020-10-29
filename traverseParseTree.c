@@ -192,6 +192,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
   int x = 0;
   bool pass1 = true;
   bool pass2 = true;
+  bool flag = true;
   do
   {
     if(init->leftChild != init->rightChild)
@@ -227,11 +228,13 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       num_rowLists--;
       if(num_rowLists<0)
       {
-        printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
+        flag = false;
       }
 
     }while(pass2);
     
+    if(flag == false)
+      printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
     if(num_rowLists>0)
     {
       printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
