@@ -166,13 +166,14 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
   int x = 0;
   do
   {
+    if(x)
+      init = init->rightChild;
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
     while(strcmp(temp->sym, "TK_SIZE") !=  0) {
       temp = temp->rightSib;
     }
     jaggDecStmt->t.j2.range1[x] = atoi(temp->rightSib->lexeme);
     x++;
-    init = init->rightChild;
   }while(init->leftChild != init->rightChild);
 }
 
