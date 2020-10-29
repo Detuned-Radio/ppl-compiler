@@ -11,7 +11,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt);
 void propagateTypeExp(TreeNode* node);
 void populateTable(TreeNode* root , TypeExpTable* head);
 void printTypeExpressionTable(TypeExpTable* table);
-void printTypeExp(TypeExp t, typeExpTag tag);
+char* printTypeExp(TypeExp t, typeExpTag tag);
 void traverseAsgList(TreeNode* root, TypeExpTable* table);
 void processAsgStmt(TreeNode* asgStmt, TypeExpTable* table);
 void processExpression(TreeNode* expr, TypeExpTable* table);

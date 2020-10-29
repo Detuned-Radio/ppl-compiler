@@ -104,7 +104,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
           if(!isdigit(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme[i]))
             isLiteral = false;
         if(!isLiteral) {
-          t.r.dynRange[x][0] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme) + 1));
+          rectDecStmt -> t.r.dynRange[x][0] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme) + 1));
           strcpy(t.r.dynRange[x][0], rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);
           rectDecStmt -> t.r.statDyn = 2;
         }
@@ -117,7 +117,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
           if(!isdigit(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme[i]))
             isLiteral = false;
         if(!isLiteral) {
-          t.r.dynRange[x][1] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme) + 1));
+          rectDecStmt -> t.r.dynRange[x][1] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme) + 1));
           strcpy(t.r.dynRange[x][1], rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
           rectDecStmt -> t.r.statDyn = 2;
         }
@@ -132,7 +132,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
       if(!isdigit(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme[i]))
         isLiteral = false;
     if(!isLiteral) {
-      t.r.dynRange[x][0] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme) + 1));
+      rectDecStmt -> t.r.dynRange[x][0] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme) + 1));
       strcpy(t.r.dynRange[x][0], rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);
       rectDecStmt -> t.r.statDyn = 2;
     }
@@ -144,7 +144,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
       if(!isdigit(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme[i]))
         isLiteral = false;
     if(!isLiteral) {
-      t.r.dynRange[x][1] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme) + 1));
+      rectDecStmt -> t.r.dynRange[x][1] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme) + 1));
       strcpy(t.r.dynRange[x][1], rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
       rectDecStmt -> t.r.statDyn = 2;
     }
