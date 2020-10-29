@@ -16,7 +16,7 @@ void traverseParseTree(TreeNode* root) {
   populateTable(root, table);
   printTypeExpressionTable(table);
   printf("ERRORS:\n");
-  printf("%-10s%-15s%-10s%-20s%-30s%-20s%-30s%-8s%s\n", "LINE NUM", "CATEGORY", "OPERATOR", 
+  printf("%-10s%-15s%-10s%-20s%-30s%-20s%-30s%-8s%s\n", "LINE NUM", "CATEGORY", "OPERATOR",
     "LEXEME OP1", "TYPE OP1", "LEXEME OP2", "TYPE OP2", "DEPTH", "MESSAGE");
   traverseAsgList(root, table);
 }
@@ -38,7 +38,7 @@ void processDecStmt(TreeNode* decStmt) {
     processPrimDecStmt(decStmt -> leftChild);
   } else if(strcmp(decStmt -> leftChild -> sym, "RECTARR_DECLARATION_STMT")==0) {
     decStmt -> leftChild -> tag = 1;  // setting tag to rect
-    processRectDecStmt(decStmt -> leftChild); //pending: variable 
+    processRectDecStmt(decStmt -> leftChild); //pending: variable
   } else if(strcmp(decStmt -> leftChild -> leftChild -> sym, "JAGGARR2D_DECLARATION_STMT")==0) {
     decStmt -> leftChild -> tag = 2;  // setting tag to jagg2
     processJagg2DDecStmt(decStmt-> leftChild->leftChild);
@@ -125,7 +125,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
       rangeList = rangeList -> rightChild;
       x++;
   }
-  rectDecStmt -> t.r.range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives 
+  rectDecStmt -> t.r.range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives
   if(rectDecStmt -> t.r.range[x][0] == 0) {
     bool isLiteral = true;
     for(int i = 0; i < strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme); i++)
@@ -200,7 +200,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
     while(strcmp(temp->sym, "TK_SIZE") != 0) {
       temp = temp->rightSib;
     }
-    jaggDecStmt->t.j3.range1[x] = (int*) malloc(sizeof(int)*(atoi(temp->rightSib->lexeme)+1)); 
+    jaggDecStmt->t.j3.range1[x] = (int*) malloc(sizeof(int)*(atoi(temp->rightSib->lexeme)+1));
     jaggDecStmt->t.j3.range1[x][0] = atoi(temp->rightSib->lexeme); //size of row list stored at first place
     TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
     int y=0;
@@ -245,7 +245,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
     TreeNode* iter = temp->leftChild->leftChild; //TYPE_DECLARATION_STMT
     if(iter->sym == "JAGGARR_DECLARATION_STMT")
       iter = iter->leftChild;
-    
+
     if(strcmp(iter->leftChild->rightSib->sym, "TK_LIST")==0) {
       TreeNode* it = iter->leftChild->rightSib->rightSib->rightSib->rightSib; //id_list
       while(it->leftChild != it->rightChild){
@@ -260,7 +260,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
         popu->t = it->t;
         popu->tag = it->tag;
         popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
-        popu = popu->next;      
+        popu = popu->next;
     } else if(strcmp(iter->leftChild->rightSib->sym, "ID")==0){
       strcpy(popu->identifier,iter->leftChild->rightSib->lexeme);
       popu->t = iter->t;
@@ -274,19 +274,24 @@ void populateTable(TreeNode* root , TypeExpTable* head){
 }
 
 void printTypeExpressionTable(TypeExpTable* table) {
-  printf("%-22s%-6s%-16s%-30s\n", "VARIABLE NAME", "TYPE", "STATIC/DYN", "TYPE EXPRESSION");
+  printf("%-22s%-6s%-12s%-30s\n", "VARIABLE NAME", "TYPE", "DYNAMIC", "TYPE EXPRESSION");
   while(table) {
     printf("%-20s  ", table -> identifier);
     switch(table -> tag) {
-      case 0: 
+      case 0:
+      printf("prim  ");
+      break;
       case 1:
-        printf("%-6d", table -> tag);
+        printf("rect  ");
         break;
       case 2:
+      printf("jagg2d");
+      break;
       case 3:
-        printf("%-6d", 2);
+        printf("jagg3d");
         break;
     }
+    //static dynamic
     if(table -> tag != 1){
       printf("%-16s", "NOT_APPLICABLE");
     } else {
@@ -295,40 +300,101 @@ void printTypeExpressionTable(TypeExpTable* table) {
       else
         printf("%-16s", "DYNAMIC");
     }
-    printTypeExp(table -> t, table -> tag);
-    printf("\n");
+
+    char *ans=printTypeExp(table -> t, table -> tag);
+    printf("%s\n",ans);
+    free(ans);
 
     table = table -> next;
   }
 }
 
-void printTypeExp(TypeExp t, typeExpTag tag) {
+char* printTypeExp(TypeExp t, typeExpTag tag) {
+  char *ans=(char *)malloc(sizeof(char)*300);
   if(tag==0) {
     char* ptstr= NULL;
     switch(t.p.primitiveType) {
       case 0:
-        ptstr = "integer";
+        strcat(ans,"<type=integer     >");
         break;
       case 1:
+        strcat(ans,"<type=real        >");
         ptstr = "real";
         break;
       case 2:
+        strcat(ans,"<type=boolean     >");
         ptstr = "boolean";
         break;
     }
-    printf("<type=%s>", ptstr);
+    //printf("<type=%-12s>", ptstr);
   } else if(tag==1) {
-    printf("<type=rectangularArray, dimensions=%d, ", t.r.dimensions);
+     strcat(ans,"<type=rectangularArray, dimensions=");
+     char trial[5];
+     sprintf(trial,"%d",t.r.dimensions);
+     strcat(ans,trial);
+     strcat(ans,", ");
+    //printf("<type=rectangularArray, dimensions=%d, ", t.r.dimensions);
     for(int i = 1; i <= t.r.dimensions; i++) {
-      printf("range_R%d=(%d, %d), ", i, t.r.range[i-1][0], t.r.range[i-1][1]);
+      strcat(ans,"range_R");
+      sprintf(trial,"%d",i);
+      strcat(ans,trial);
+      strcat(ans,"=(");
+      sprintf(trial,"%d",t.r.range[i-1][0]);
+      strcat(ans,trial);
+      strcat(ans,",");
+      sprintf(trial,"%d",t.r.range[i-1][1]);
+      strcat(ans,trial);
+      strcat(ans,"), ");
+      //printf("range_R%d=(%d, %d), ", i, t.r.range[i-1][0], t.r.range[i-1][1]);
     }
-    printf("basicElementType=integer>");
+    strcat(ans,"basicElementType=integer>");
   } else if(tag==2){
-    printf("PENDING");
+    char trial[5];
+    strcat(ans,"<type=rectangularArray, dimensions=2, range_R1=(");
+    sprintf(trial,"%d",t.j2.range0[0]);
+    strcat(ans,trial);
+    strcat(ans,", ");
+    sprintf(trial,"%d",t.j2.range0[1]);
+    strcat(ans,trial);
+    strcat(ans,"),range_R2 = (");
+    for(int i=0;i<t.j2.range0[1]-t.j2.range0[0]+1;i++){
+      sprintf(trial,"%d",t.j2.range1[]);
+      strcat(ans,trial);
+      if(i==t.j2.range0[1]-t.j2.range0[0])
+      strcat(ans,"), basicElementType = integer>");
+      else
+      strcat(ans,",");
+    }
   } else { //tag==3!
-    printf("PENDING");
+    char trial[5];
+    strcat(ans,"<type=rectangularArray, dimensions=3, range_R1=(");
+    sprintf(trial,"%d",t.j3.range0[0]);
+    strcat(ans,trial);
+    strcat(ans,", ");
+    sprintf(trial,"%d",t.j3.range0[1]);
+    strcat(ans,trial);
+    strcat(ans,"),range_R2 = (");
+    for(int i=0;i<t.j3.range0[1]-t.j3.range0[0]+1;i++){
+      sprintf(trial,"%d",t.j3.range[i][0]);
+      strcat(ans,trial);
+      strcat(ans,"[");
+      for(int j=0;j<t.j3.range[i][0];j++){
+        sprintf(trial,"%d",t.j3.range[i][j+1]);
+        strcat(ans,trial);
+        if(j==t.j3.range[i][0] && i==t.j3.range0[1]-t.j3.range0[0])
+        strcat(ans,"]");
+        else if(j==t.j3.range[i][0]-1)
+        strcat(ans,"],");
+        else
+        strcat(ans,",");
+      }
+    }
+    strcat(ans,"),basicElementType = integer>")
+
   }
+  return ans;
 }
+
 
 void traverseAsgList(TreeNode* root, TypeExpTable* table) {
   TreeNode* programBody = root -> rightChild -> leftSib;
@@ -352,7 +418,7 @@ void processAsgStmt(TreeNode* asgStmt, TypeExpTable* table){
     asgStmt -> t = lhs;
     asgStmt -> tag = lhsTag;
   } else {
-    printError(asgStmt -> line_no, true, "TK_EQUALS", asgStmt -> leftChild, asgStmt -> rightChild -> leftSib, asgStmt -> depth, 
+    printError(asgStmt -> line_no, true, "TK_EQUALS", asgStmt -> leftChild, asgStmt -> rightChild -> leftSib, asgStmt -> depth,
       "Identifier-Expr type mismatch");
   }
 }
@@ -389,7 +455,7 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
       if(operator == "TK_DIV") {
         // always evaluates to real
         expr -> tag = 0;
-        expr -> t.p.primitiveType = 1; 
+        expr -> t.p.primitiveType = 1;
       } else {
         expr -> t = expr -> leftChild -> t;
         expr -> tag = expr -> leftChild -> tag;
@@ -400,11 +466,11 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
 
 bool isArrayVariable(TreeNode* node) {
 
-  if(node -> leftChild && 
+  if(node -> leftChild &&
      strcmp(node -> leftChild -> sym, "ID")==0 &&
-     node -> leftChild -> rightSib && 
+     node -> leftChild -> rightSib &&
      strcmp(node -> leftChild -> rightSib -> sym, "SQ_OP")==0 &&
-     node -> leftChild -> rightSib -> rightSib && 
+     node -> leftChild -> rightSib -> rightSib &&
      strcmp(node -> leftChild -> rightSib -> rightSib -> sym, "INDEX_LIST")==0 &&
      node -> leftChild -> rightSib -> rightSib -> rightSib &&
      strcmp(node -> leftChild -> rightSib -> rightSib -> rightSib -> sym, "SQ_CL")==0 &&
@@ -432,7 +498,7 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
       int index = atoi(indexList -> leftChild -> leftChild -> lexeme);
       bool isLiteral = true;
       if(index == 0) {
-        for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++) 
+        for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++)
           if(!isdigit(indexList -> leftChild -> leftChild -> lexeme[i]))
             isLiteral = false;
       }
@@ -461,20 +527,20 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
     }
     bool isLiteral0 = true;
     if(index0 == 0) {
-      for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++) 
+      for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++)
         if(!isdigit(indexList -> leftChild -> leftChild -> lexeme[i]))
           isLiteral0 = false;
     }
     bool isLiteral1 = true;
     if(index1 == 0) {
-      for(int i = 0; i < strlen(indexList -> rightChild -> leftChild -> leftChild -> lexeme); i++) 
+      for(int i = 0; i < strlen(indexList -> rightChild -> leftChild -> leftChild -> lexeme); i++)
         if(!isdigit(indexList -> rightChild -> leftChild -> leftChild -> lexeme[i]))
           isLiteral1 = false;
     }
     int low0 = arr.j2.range0[0];
     int high0 = arr.j2.range0[1];
     int size1 = arr.j2.range1[index0 - low0];
-    bool pass = (!isLiteral0 || ((index0 >= low0) && (index0 <= high0))) && 
+    bool pass = (!isLiteral0 || ((index0 >= low0) && (index0 <= high0))) &&
                 (!isLiteral1 || (index1 < size1));
     if(pass) {
       arrVar -> tag = 0;
@@ -494,19 +560,19 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
     }
     bool isLiteral0 = true;
     if(index0 == 0) {
-      for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++) 
+      for(int i = 0; i < strlen(indexList -> leftChild -> leftChild -> lexeme); i++)
         if(!isdigit(indexList -> leftChild -> leftChild -> lexeme[i]))
           isLiteral0 = false;
     }
     bool isLiteral1 = true;
     if(index1 == 0) {
-      for(int i = 0; i < strlen(indexList -> rightChild -> leftChild -> leftChild -> lexeme); i++) 
+      for(int i = 0; i < strlen(indexList -> rightChild -> leftChild -> leftChild -> lexeme); i++)
         if(!isdigit(indexList -> rightChild -> leftChild -> leftChild -> lexeme[i]))
           isLiteral1 = false;
     }
     bool isLiteral2 = true;
     if(index2 == 0) {
-      for(int i = 0; i < strlen(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme); i++) 
+      for(int i = 0; i < strlen(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme); i++)
         if(!isdigit(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme[i]))
           isLiteral2 = false;
     }
@@ -514,7 +580,7 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
     int high0 = arr.j3.range0[1];
     int size1 = arr.j3.range1[index0][0];
     int size2 = arr.j3.range1[index0][index1 + 1];
-    bool pass = (!isLiteral0 || ((index0 >= low0) && (index0 <= high0))) && 
+    bool pass = (!isLiteral0 || ((index0 >= low0) && (index0 <= high0))) &&
                 (!isLiteral1 || (index1 < size1)) &&
                 (!isLiteral2 || (index2 < size2));
     if(pass) {
@@ -674,7 +740,7 @@ void printError(int line_no, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* r
     rhs_lexeme = "***";
     rhs_type = "***";
   }
-  printf("%-10d%-15s%-10s%-20s%-30s%-20s%-30s%-8d%s\n", line_no, cat_str, op_str, 
+  printf("%-10d%-15s%-10s%-20s%-30s%-20s%-30s%-8d%s\n", line_no, cat_str, op_str,
                                                         lhs_lexeme, lhs_type,
                                                         rhs_lexeme, rhs_type,
                                                         depth, msg);
