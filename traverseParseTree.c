@@ -361,7 +361,7 @@ char* printTypeExp(TypeExp t, typeExpTag tag) {
     strcat(ans,trial);
     strcat(ans,"),range_R2 = (");
     for(int i=0;i<t.j2.range0[1]-t.j2.range0[0]+1;i++){
-      sprintf(trial,"%d",t.j2.range1[]);
+      sprintf(trial,"%d",t.j2.range1[i]);
       strcat(ans,trial);
       if(i==t.j2.range0[1]-t.j2.range0[0])
       strcat(ans,"), basicElementType = integer>");
@@ -378,21 +378,21 @@ char* printTypeExp(TypeExp t, typeExpTag tag) {
     strcat(ans,trial);
     strcat(ans,"),range_R2 = (");
     for(int i=0;i<t.j3.range0[1]-t.j3.range0[0]+1;i++){
-      sprintf(trial,"%d",t.j3.range[i][0]);
+      sprintf(trial,"%d",t.j3.range1[i][0]);
       strcat(ans,trial);
       strcat(ans,"[");
-      for(int j=0;j<t.j3.range[i][0];j++){
-        sprintf(trial,"%d",t.j3.range[i][j+1]);
+      for(int j=0;j<t.j3.range1[i][0];j++){
+        sprintf(trial,"%d",t.j3.range1[i][j+1]);
         strcat(ans,trial);
-        if(j==t.j3.range[i][0] && i==t.j3.range0[1]-t.j3.range0[0])
+        if(j==t.j3.range1[i][0] && i==t.j3.range0[1]-t.j3.range0[0])
         strcat(ans,"]");
-        else if(j==t.j3.range[i][0]-1)
+        else if(j==t.j3.range1[i][0]-1)
         strcat(ans,"],");
         else
         strcat(ans,",");
       }
     }
-    strcat(ans,"),basicElementType = integer>")
+    strcat(ans,"),basicElementType = integer>");
 
   }
   return ans;
