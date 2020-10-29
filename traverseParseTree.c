@@ -23,7 +23,7 @@ void traverseParseTree(TreeNode* root) {
   populateTable(root, table);
   printTypeExpressionTable(table);
   printf("ERRORS:\n");
-  printf("%-10s%-15s%-10s%-20s%-30s%-20s%-30s%-8s%s\n", "LINE NUM", "CATEGORY", "OPERATOR",
+  printf("%-10s%-15s%-10s%-20s%-130s%-20s%-130s%-8s%s\n", "LINE NUM", "CATEGORY", "OPERATOR",
     "LEXEME OP1", "TYPE OP1", "LEXEME OP2", "TYPE OP2", "DEPTH", "MESSAGE");
   traverseAsgList(root, table);
 }
@@ -99,6 +99,8 @@ void processRectDecStmt(TreeNode* rectDecStmt){
   rectDecStmt -> t.r.dynRange = (char***) malloc(sizeof(char**) * dimensions);
   for(int i = 0 ; i < dimensions ; i++){
     rectDecStmt -> t.r.dynRange[i] = (char**) malloc(sizeof(char*) * 2);
+    rectDecStmt -> t.r.dynRange[i][0] = NULL;
+    rectDecStmt -> t.r.dynRange[i][1] = NULL;
   }
   // assigning values to ranges
   int x = 0;
@@ -722,6 +724,10 @@ bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs) {
     printError(lhs, true, op, lhs, rhs, lhs -> depth, "Operand type mismatch");
     return false;
   }
+  if(atag == 0 && a.p.primitiveType != b.p.primitiveType) {
+    printError(lhs, true, op, lhs, rhs, lhs -> depth, "Operand type mismatch");
+    return false;
+  }
   // allow division of arrays?
   if(strcmp(op, "TK_PLUS")==0 || strcmp(op, "TK_MINUS")==0 || strcmp(op, "TK_STAR")==0) {
     if(atag == 0) {
@@ -818,7 +824,7 @@ void printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNo
     rhs_type = "***";
   }
 
-  printf("%-10d%-15s%-10s%-20s%-30s%-20s%-30s%-8d%s\n", line_no, cat_str, op_str,
+  printf("%-10d%-15s%-10s%-20s%-130s%-20s%-130s%-8d%s\n", line_no, cat_str, op_str,
                                                         lhs_lexeme, lhs_type,
                                                         rhs_lexeme, rhs_type,
                                                         depth, msg);
