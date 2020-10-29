@@ -318,14 +318,14 @@ char* printTypeExp(TypeExp t, typeExpTag tag) {
     char* ptstr= NULL;
     switch(t.p.primitiveType) {
       case 0:
-        strcat(ans,"<type=integer     >");
+        strcat(ans,"<type=integer>    >");
         break;
       case 1:
-        strcat(ans,"<type=real        >");
+        strcat(ans,"<type=real>        ");
         ptstr = "real";
         break;
       case 2:
-        strcat(ans,"<type=boolean     >");
+        strcat(ans,"<type=boolean>     ");
         ptstr = "boolean";
         break;
     }
