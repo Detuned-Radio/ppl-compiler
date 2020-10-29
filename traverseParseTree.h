@@ -19,6 +19,7 @@ bool isArrayVariable(TreeNode* node);
 void processArrayVariable(TreeNode* arrVar, TypeExpTable* table);
 void getTypeExp(TreeNode* id, TypeExpTable* table);
 bool equalTypeExp(TypeExp a, typeExpTag atag, TypeExp b, typeExpTag btag);
-bool checkOperands(TypeExp a, typeExpTag atag, char* op, TypeExp b, typeExpTag btag);
+bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs);
+void printError(int line_no, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg);
 
 #endif

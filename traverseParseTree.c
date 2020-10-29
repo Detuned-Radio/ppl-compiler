@@ -15,6 +15,9 @@ void traverseParseTree(TreeNode* root) {
   TypeExpTable* table = (TypeExpTable*) malloc(sizeof(TypeExpTable));
   populateTable(root, table);
   printTypeExpressionTable(table);
+  printf("ERRORS:\n");
+  printf("%-10s%-15s%-10s%-20s%-30s%-20s%-30s%-8s%s\n", "LINE NUM", "CATEGORY", "OPERATOR", 
+    "LEXEME OP1", "TYPE OP1", "LEXEME OP2", "TYPE OP2", "DEPTH", "MESSAGE");
   traverseAsgList(root, table);
 }
 
@@ -283,7 +286,8 @@ void processAsgStmt(TreeNode* asgStmt, TypeExpTable* table){
     asgStmt -> t = lhs;
     asgStmt -> tag = lhsTag;
   } else {
-    printf("ERROR: ASSIGNMENT\n");
+    printError(asgStmt -> line_no, true, "TK_EQUALS", asgStmt -> leftChild, asgStmt -> rightChild -> leftSib, asgStmt -> depth, 
+      "Identifier-Expr type mismatch");
   }
 }
 
@@ -312,12 +316,10 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
   }
   processExpression(expr -> leftChild, table);
   processExpression(expr -> rightChild, table);
-  TypeExp lhs = expr -> leftChild -> t;
-  typeExpTag lhsTag = expr -> leftChild -> tag;
-  TypeExp rhs = expr -> rightChild -> leftSib -> t;
-  typeExpTag rhsTag = expr -> rightChild -> leftSib -> tag;
+  TreeNode* lhs = expr -> leftChild;
+  TreeNode* rhs = expr -> rightChild -> leftSib;
   char* operator = expr -> leftChild -> rightSib -> sym;
-  if(checkOperands(lhs, lhsTag, operator, rhs, rhsTag)) {
+  if(checkOperands(lhs, operator, rhs)) {
       if(operator == "TK_DIV") {
         // always evaluates to real
         expr -> tag = 0;
@@ -327,8 +329,6 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
         expr -> tag = expr -> leftChild -> tag;
       }
     return;
-  } else {
-    printf("ERROR");
   }
 }
 
@@ -355,11 +355,12 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
   bool dynamic = false;
   if(arrTag == 1) {
     int dimensions = arr.r.dimensions;
+    int dims = dimensions;
     bool pass = true;
-    while(indexList -> leftChild != indexList -> rightChild) {
-      if(dimensions <= 0) {
-        pass = false;
-        break;
+    bool proceed = true;
+    while(proceed && dimensions > 0) {
+      if(indexList -> leftChild == indexList -> rightChild) {
+        proceed = false;
       }
       dimensions--;
       int index = atoi(indexList -> leftChild -> leftChild -> lexeme);
@@ -369,22 +370,27 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
           if(!isdigit(indexList -> leftChild -> leftChild -> lexeme[i]))
             isLiteral = false;
       }
-      if(isLiteral && (!(index >= arr.r.range[dimensions][0] && index <= arr.r.range[dimensions][1]))) {
+      if(isLiteral && (!(index >= arr.r.range[dims-dimensions-1][0] && index <= arr.r.range[dims-dimensions-1][1]))) {
         pass = false;
         break;
       }
+      indexList = indexList -> rightChild;
+    }
+    if(proceed || dimensions) {
+      pass = false;
     }
     if(pass) {
       arrVar -> tag = 0;
       arrVar -> t.p.primitiveType = 0;
     } else {
-      printf("ERROR: Indexing error");
+      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "RectArray indexing error");
+      return;
     }
   } else if(arrTag == 2) {
     int index0 = atoi(indexList -> leftChild -> leftChild -> lexeme);
     int index1 = atoi(indexList -> rightChild -> leftChild -> leftChild -> lexeme);
     if(indexList -> rightChild -> leftChild != indexList -> rightChild -> rightChild) {
-      printf("ERROR: Indexing error (dimension mismatch)");
+      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg2DArr indexing error");
       return;
     }
     bool isLiteral0 = true;
@@ -408,7 +414,8 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
       arrVar -> tag = 0;
       arrVar -> t.p.primitiveType = 0;
     } else {
-      printf("ERROR: Indexing error");
+      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg2DArr indexing error");
+      return;
     }
 
   } else if(arrTag == 3) {
@@ -416,7 +423,7 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
     int index1 = atoi(indexList -> rightChild -> leftChild -> leftChild -> lexeme);
     int index2 = atoi(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme);
     if(indexList -> rightChild -> rightChild -> leftChild != indexList -> rightChild -> rightChild -> rightChild) {
-      printf("ERROR: Indexing error (dimension mismatch)");
+      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg3DArr indexing error");
       return;
     }
     bool isLiteral0 = true;
@@ -448,7 +455,7 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
       arrVar -> tag = 0;
       arrVar -> t.p.primitiveType = 0;
     } else {
-      printf("ERROR: Indexing error");
+      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg3DArr indexing error");
     }
   }
 }
@@ -460,7 +467,7 @@ void getTypeExp(TreeNode* id, TypeExpTable* table) {
     table = table -> next;
   }
   if(table == NULL) {
-    printf("Type expression table entry missing for %s.", id -> lexeme);
+    printf("DEBUG: Type expression table entry missing for %s.\n", id -> lexeme);
     return;
   }
   id -> tag = table -> tag;
@@ -503,23 +510,29 @@ bool equalTypeExp(TypeExp a, typeExpTag atag, TypeExp b, typeExpTag btag) {
   }
 }
 
-bool checkOperands(TypeExp a, typeExpTag atag, char* op, TypeExp b, typeExpTag btag) {
-  if(atag != btag)
+bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs) {
+  TypeExp a = lhs -> t;
+  typeExpTag atag = lhs -> tag;
+  TypeExp b = rhs -> t;
+  typeExpTag btag = rhs -> tag;
+  if(atag != btag){
+    printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Operand type mismatch");
     return false;
+  }
   // allow division of arrays?
   if(strcmp(op, "TK_PLUS")==0 || strcmp(op, "TK_MINUS")==0 || strcmp(op, "TK_STAR")==0) {
     if(atag == 0) {
       if(a.p.primitiveType == 0 || a.p.primitiveType == 1)
         return true;
       else {
-        printf("ERROR: Cannot apply arithmetic opertors on booleans.");
+        printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Arithmetic ops on booleans NA");
         return false;
       }
     } else {
       if(equalTypeExp(a, atag, b, btag))
         return true;
       else {
-        printf("ERROR: Size mismatch");
+        printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Array operand dim mismatch");
         return false;
       }
     }
@@ -528,11 +541,11 @@ bool checkOperands(TypeExp a, typeExpTag atag, char* op, TypeExp b, typeExpTag b
       if(a.p.primitiveType == 0 || a.p.primitiveType == 1)
         return true;
       else {
-        printf("ERROR: Cannot apply arithmetic opertors on booleans.");
+        printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Arithmetic ops on booleans NA");
         return false;
       }
     } else {
-      printf("ERROR: Elementwise division (Arrays of real type) not supported.");
+      printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Elementwise division NA");
       return false;
     }
   } else if(strcmp(op, "TK_AND")==0 || strcmp(op, "TK_OR")==0) {
@@ -540,14 +553,63 @@ bool checkOperands(TypeExp a, typeExpTag atag, char* op, TypeExp b, typeExpTag b
       if(a.p.primitiveType == 2)
         return true;
       else {
-        printf("ERROR: Cannot apply logical opertors on non-boolean types.");
+        printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Logical ops on int/real NA");
         return false;
       }
     } else {
-      printf("ERROR: Elementwise logical operations not supported.");
+      printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Elementwise logical ops NA");
       return false;
     }
   } else {
-    printf("ERROR: Invalid operator (%s).\n", op);
+    printError(lhs -> line_no, true, op, NULL, NULL, lhs -> depth, "Invalid operator");
   }
+}
+
+void printError(int line_no, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg) {
+  char* cat_str = NULL;
+  if(asgnStmt)
+    cat_str = "ASSIGNMENT";
+  else
+    cat_str = "DECLARATION";
+
+  char* op_str = NULL;
+  if(op == NULL)
+    op_str = "***";
+  else if(strcmp(op, "TK_PLUS")==0)
+    op_str = "+";
+  else if(strcmp(op, "TK_MINUS")==0)
+    op_str = "-";
+  else if(strcmp(op, "TK_STAR")==0)
+    op_str = "*";
+  else if(strcmp(op, "TK_DIV")==0)
+    op_str = "/";
+  else if(strcmp(op, "TK_AND")==0)
+    op_str = "&&&";
+  else if(strcmp(op, "TK_OR")==0)
+    op_str = "|||";
+  else if(strcmp(op, "TK_EQUALS")==0)
+    op_str = "=";
+
+  char* lhs_lexeme = NULL;
+  char* lhs_type = NULL;
+  if(lhs) {
+    lhs_lexeme = lhs -> lexeme;
+    lhs_type = printTypeExp(lhs -> t, lhs -> tag);
+  } else {
+    lhs_lexeme = "***";
+    lhs_type = "***";
+  }
+  char* rhs_lexeme = NULL;
+  char* rhs_type = NULL;
+  if(rhs) {
+    rhs_lexeme = rhs -> lexeme;
+    rhs_type = printTypeExp(rhs -> t, rhs -> tag);
+  } else {
+    rhs_lexeme = "***";
+    rhs_type = "***";
+  }
+  printf("%-10d%-15s%-10s%-20s%-30s%-20s%-30s%-8d%s\n", line_no, cat_str, op_str, 
+                                                        lhs_lexeme, lhs_type,
+                                                        rhs_lexeme, rhs_type,
+                                                        depth, msg);
 }
