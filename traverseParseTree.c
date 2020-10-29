@@ -191,6 +191,7 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
     x++;
      if(flag == false)
       printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
+    flag=true;
   }while(init->leftChild != init->rightChild);
 }
 
@@ -256,7 +257,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
     {
       printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
     }
-    
+    flag=true;
     x++;
     init = init->rightChild;
   }while(pass1);
