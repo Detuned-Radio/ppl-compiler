@@ -105,7 +105,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
             isLiteral = false;
         if(!isLiteral) {
           rectDecStmt -> t.r.dynRange[x][0] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme) + 1));
-          strcpy(t.r.dynRange[x][0], rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);
+          strcpy(rectDecStmt -> t.r.dynRange[x][0], rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);
           rectDecStmt -> t.r.statDyn = 2;
         }
 
@@ -118,7 +118,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
             isLiteral = false;
         if(!isLiteral) {
           rectDecStmt -> t.r.dynRange[x][1] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme) + 1));
-          strcpy(t.r.dynRange[x][1], rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
+          strcpy(rectDecStmt -> t.r.dynRange[x][1], rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
           rectDecStmt -> t.r.statDyn = 2;
         }
       }
@@ -133,7 +133,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
         isLiteral = false;
     if(!isLiteral) {
       rectDecStmt -> t.r.dynRange[x][0] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme) + 1));
-      strcpy(t.r.dynRange[x][0], rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);
+      strcpy(rectDecStmt -> t.r.dynRange[x][0], rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);
       rectDecStmt -> t.r.statDyn = 2;
     }
   }
@@ -145,7 +145,7 @@ void processRectDecStmt(TreeNode* rectDecStmt){
         isLiteral = false;
     if(!isLiteral) {
       rectDecStmt -> t.r.dynRange[x][1] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme) + 1));
-      strcpy(t.r.dynRange[x][1], rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
+      strcpy(rectDecStmt -> t.r.dynRange[x][1], rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
       rectDecStmt -> t.r.statDyn = 2;
     }
   }
