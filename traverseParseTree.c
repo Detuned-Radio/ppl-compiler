@@ -227,15 +227,15 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       num_rowLists--;
       if(num_rowLists<0)
       {
-        printError(init->leftChild,false,null,null,null,init->leftChild.depth,"type definition error");
+        printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
       }
-      printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg)
+      // printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg)
 
     }while(pass2);
     
     if(num_rowLists>0)
     {
-      printError(init->leftChild,false,null,null,null,init->leftChild.depth,"type definition error");
+      printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
     }
     
     x++;
@@ -264,7 +264,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
         temp = temp->rightChild;
     flag = 1;
     TreeNode* iter = temp->leftChild->leftChild; //TYPE_DECLARATION_STMT
-    if(iter->sym == "JAGGARR_DECLARATION_STMT")
+    if(strcmp(iter->sym, "JAGGARR_DECLARATION_STMT")==0)
       iter = iter->leftChild;
 
     if(strcmp(iter->leftChild->rightSib->sym, "TK_LIST")==0) {
@@ -443,16 +443,17 @@ void processAsgStmt(TreeNode* asgStmt, TypeExpTable* table){
 }
 
 void processExpression(TreeNode* expr, TypeExpTable* table) {
-  printf("%s\n", expr -> sym);
-  if(expr -> isTerminal)
-    printf("--> %s\n", expr -> lexeme);
+  // printf("%s\n", expr -> sym);
+  // if(expr -> isTerminal)
+  //   printf("--> %s\n", expr -> lexeme);
   if(expr -> leftChild == NULL) {
-    if(expr -> sym == "CONSTANT") {
+    if(strcmp(expr -> sym, "CONSTANT")==0) {
       expr -> tag = 0;
       expr -> t.p.primitiveType = 0;
       return;
     }
-    if(expr -> sym == "ID") {
+    if(strcmp(expr -> sym, "ID")==0) {
+      // printf("ID Detect\n");
       getTypeExp(expr, table);
       return;
     }
@@ -471,10 +472,10 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
   processExpression(expr -> leftChild, table);
   processExpression(expr -> rightChild, table);
   TreeNode* lhs = expr -> leftChild;
-  TreeNode* rhs = expr -> rightChild -> leftSib;
+  TreeNode* rhs = expr -> rightChild;
   char* operator = expr -> leftChild -> rightSib -> sym;
   if(checkOperands(lhs, operator, rhs)) {
-      if(operator == "TK_DIV") {
+      if(strcmp(operator, "TK_DIV")==0) {
         // always evaluates to real
         expr -> tag = 0;
         expr -> t.p.primitiveType = 1;
@@ -626,9 +627,9 @@ void getTypeExp(TreeNode* id, TypeExpTable* table) {
   }
   id -> tag = table -> tag;
   id -> t = table -> t;
-  printf("Got tag %d for %s\n", id -> tag, id -> lexeme);
-  if(id -> tag == 0)
-    printf("prim: %d\n", id -> t.p.primitiveType);
+  // printf("Got tag %d for %s\n", id -> tag, id -> lexeme);
+  // if(id -> tag == 0)
+  //   printf("prim: %d\n", id -> t.p.primitiveType);
   return;
 }
 
