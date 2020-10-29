@@ -180,7 +180,6 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
       num--;
       if(num<0){
       flag=false;
-      break;
       }
       valList = valList->rightChild;
     }
@@ -188,9 +187,9 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
       if(num!=0)
       flag=false;
     x++;
-  }while(init->leftChild != init->rightChild);
-  if(flag == false)
+     if(flag == false)
       printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
+  }while(init->leftChild != init->rightChild);
 }
 
 void processJagg3DDecStmt(TreeNode * jaggDecStmt){
