@@ -248,14 +248,19 @@ void populateTable(TreeNode* root , TypeExpTable* head){
     
     if(strcmp(iter->leftChild->rightSib->sym, "TK_LIST")==0) {
       TreeNode* it = iter->leftChild->rightSib->rightSib->rightSib->rightSib; //id_list
-      do{
+      while(it->leftChild != it->rightChild){
         strcpy(popu->identifier,it->leftChild->lexeme);
         popu->t = it->t;
         popu->tag = it->tag;
         popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
         popu = popu->next;
         it = it->rightChild;
-      } while(it->leftChild != it->rightChild);
+      }
+        strcpy(popu->identifier,it->leftChild->lexeme);
+        popu->t = it->t;
+        popu->tag = it->tag;
+        popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
+        popu = popu->next;      
     } else if(strcmp(iter->leftChild->rightSib->sym, "ID")==0){
       strcpy(popu->identifier,iter->leftChild->rightSib->lexeme);
       popu->t = iter->t;
@@ -265,7 +270,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
     }
     temp = temp->rightChild;
   } while(temp->leftChild != temp->rightChild);
-
+  popu->next = NULL;
 }
 
 void printTypeExpressionTable(TypeExpTable* table) {
