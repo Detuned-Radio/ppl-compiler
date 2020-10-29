@@ -318,7 +318,7 @@ char* printTypeExp(TypeExp t, typeExpTag tag) {
     char* ptstr= NULL;
     switch(t.p.primitiveType) {
       case 0:
-        strcat(ans,"<type=integer>    >");
+        strcat(ans,"<type=integer>     ");
         break;
       case 1:
         strcat(ans,"<type=real>        ");
