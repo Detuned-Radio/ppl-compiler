@@ -216,8 +216,8 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
   TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR3D_INIT_LIST
   int x = 0;
   bool pass1 = true;
-  bool pass2 = true;
-  bool flag = true;
+ 
+
   do
   {
     if(init->leftChild == init->rightChild)
@@ -234,19 +234,24 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
 
     TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
     int a=1;
+    bool pass2 = true;
     do
     {
       int y = 0;
       if(temp2->leftChild == temp2->rightChild)
         pass2 = false;
       TreeNode* temp3=temp2->leftChild;//temp3 = JAGGARR3D_VAL_LIST
+      bool pass3 = true;
+      bool flag = true;
       do{
+        if(temp3->leftChild == temp3->rightChild)
+          pass3 = false;
         y++;
         temp3=temp3->rightChild;
       }
-      while(temp3->leftChild !=temp3->rightChild);
+      while(pass3);
 
-      jaggDecStmt->t.j3.range1[x][a] = y + 1;
+      jaggDecStmt->t.j3.range1[x][a] = y;
       a++;
       temp2 = temp2->rightChild;
 
