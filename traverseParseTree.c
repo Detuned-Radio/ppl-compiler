@@ -425,7 +425,7 @@ void processAsgStmt(TreeNode* asgStmt, TypeExpTable* table){
     asgStmt -> t = lhs;
     asgStmt -> tag = lhsTag;
   } else {
-    printError(asgStmt -> line_no, true, "TK_EQUALS", asgStmt -> leftChild, asgStmt -> rightChild -> leftSib, asgStmt -> depth,
+    printError(asgStmt, true, "TK_EQUALS", asgStmt -> leftChild, asgStmt -> rightChild -> leftSib, asgStmt -> depth,
       "Identifier-Expr type mismatch");
   }
 }
@@ -522,14 +522,14 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
       arrVar -> tag = 0;
       arrVar -> t.p.primitiveType = 0;
     } else {
-      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "RectArray indexing error");
+      printError(arrVar, true, NULL, arrVar, NULL, arrVar -> depth, "RectArray indexing error");
       return;
     }
   } else if(arrTag == 2) {
     int index0 = atoi(indexList -> leftChild -> leftChild -> lexeme);
     int index1 = atoi(indexList -> rightChild -> leftChild -> leftChild -> lexeme);
     if(indexList -> rightChild -> leftChild != indexList -> rightChild -> rightChild) {
-      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg2DArr indexing error");
+      printError(arrVar, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg2DArr indexing error");
       return;
     }
     bool isLiteral0 = true;
@@ -553,7 +553,7 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
       arrVar -> tag = 0;
       arrVar -> t.p.primitiveType = 0;
     } else {
-      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg2DArr indexing error");
+      printError(arrVar, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg2DArr indexing error");
       return;
     }
 
@@ -562,7 +562,7 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
     int index1 = atoi(indexList -> rightChild -> leftChild -> leftChild -> lexeme);
     int index2 = atoi(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme);
     if(indexList -> rightChild -> rightChild -> leftChild != indexList -> rightChild -> rightChild -> rightChild) {
-      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg3DArr indexing error");
+      printError(arrVar, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg3DArr indexing error");
       return;
     }
     bool isLiteral0 = true;
@@ -594,7 +594,7 @@ void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
       arrVar -> tag = 0;
       arrVar -> t.p.primitiveType = 0;
     } else {
-      printError(arrVar -> line_no, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg3DArr indexing error");
+      printError(arrVar, true, NULL, arrVar, NULL, arrVar -> depth, "Jagg3DArr indexing error");
     }
   }
 }
@@ -655,7 +655,7 @@ bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs) {
   TypeExp b = rhs -> t;
   typeExpTag btag = rhs -> tag;
   if(atag != btag){
-    printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Operand type mismatch");
+    printError(lhs, true, op, lhs, rhs, lhs -> depth, "Operand type mismatch");
     return false;
   }
   // allow division of arrays?
@@ -664,14 +664,14 @@ bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs) {
       if(a.p.primitiveType == 0 || a.p.primitiveType == 1)
         return true;
       else {
-        printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Arithmetic ops on booleans NA");
+        printError(lhs, true, op, lhs, rhs, lhs -> depth, "Arithmetic ops on booleans NA");
         return false;
       }
     } else {
       if(equalTypeExp(a, atag, b, btag))
         return true;
       else {
-        printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Array operand dim mismatch");
+        printError(lhs, true, op, lhs, rhs, lhs -> depth, "Array operand dim mismatch");
         return false;
       }
     }
@@ -680,11 +680,11 @@ bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs) {
       if(a.p.primitiveType == 0 || a.p.primitiveType == 1)
         return true;
       else {
-        printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Arithmetic ops on booleans NA");
+        printError(lhs, true, op, lhs, rhs, lhs -> depth, "Arithmetic ops on booleans NA");
         return false;
       }
     } else {
-      printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Elementwise division NA");
+      printError(lhs, true, op, lhs, rhs, lhs -> depth, "Elementwise division NA");
       return false;
     }
   } else if(strcmp(op, "TK_AND")==0 || strcmp(op, "TK_OR")==0) {
@@ -692,19 +692,21 @@ bool checkOperands(TreeNode* lhs, char* op, TreeNode* rhs) {
       if(a.p.primitiveType == 2)
         return true;
       else {
-        printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Logical ops on int/real NA");
+        printError(lhs, true, op, lhs, rhs, lhs -> depth, "Logical ops on int/real NA");
         return false;
       }
     } else {
-      printError(lhs -> line_no, true, op, lhs, rhs, lhs -> depth, "Elementwise logical ops NA");
+      printError(lhs, true, op, lhs, rhs, lhs -> depth, "Elementwise logical ops NA");
       return false;
     }
   } else {
-    printError(lhs -> line_no, true, op, NULL, NULL, lhs -> depth, "Invalid operator");
+    printError(lhs, true, op, NULL, NULL, lhs -> depth, "Invalid operator");
   }
 }
 
-void printError(int line_no, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg) {
+void printError(TreeNode* origin, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* rhs, int depth, char* msg) {
+  int line_no = getLineNum(origin);
+
   char* cat_str = NULL;
   if(asgnStmt)
     cat_str = "ASSIGNMENT";
@@ -751,4 +753,11 @@ void printError(int line_no, bool asgnStmt, char* op, TreeNode* lhs, TreeNode* r
                                                         lhs_lexeme, lhs_type,
                                                         rhs_lexeme, rhs_type,
                                                         depth, msg);
+}
+
+int getLineNum(TreeNode* node) {
+  // first leaf
+  while(node -> leftChild)
+    node = node -> leftChild;
+  return node -> line_no;
 }
