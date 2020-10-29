@@ -282,21 +282,17 @@ void populateTable(TreeNode* root , TypeExpTable* head){
 }
 
 void printTypeExpressionTable(TypeExpTable* table) {
-  printf("%-22s%-16s%-12s%-30s\n", "VARIABLE NAME", "TYPE", "DYNAMIC", "TYPE EXPRESSION");
+  printf("%-22s%-6s%-16s%-30s\n", "VARIABLE NAME", "TYPE", "DYNAMIC", "TYPE EXPRESSION");
   while(table) {
     printf("%-20s  ", table -> identifier);
     switch(table -> tag) {
       case 0:
-      printf("prim  ");
-      break;
       case 1:
-        printf("rect  ");
+        printf("%-6d", table -> tag);
         break;
       case 2:
-      printf("jagg2d");
-      break;
       case 3:
-        printf("jagg3d");
+        printf("%-6d", 2);
         break;
     }
     //static dynamic
@@ -432,6 +428,9 @@ void processAsgStmt(TreeNode* asgStmt, TypeExpTable* table){
 }
 
 void processExpression(TreeNode* expr, TypeExpTable* table) {
+  printf("%s\n", expr -> sym);
+  if(expr -> isTerminal)
+    printf("--> %s\n", expr -> lexeme);
   if(expr -> leftChild == NULL) {
     if(expr -> sym == "CONSTANT") {
       expr -> tag = 0;
@@ -475,13 +474,13 @@ void processExpression(TreeNode* expr, TypeExpTable* table) {
 bool isArrayVariable(TreeNode* node) {
 
   if(node -> leftChild &&
-     strcmp(node -> leftChild -> sym, "ID")==0 &&
-     node -> leftChild -> rightSib &&
-     strcmp(node -> leftChild -> rightSib -> sym, "SQ_OP")==0 &&
-     node -> leftChild -> rightSib -> rightSib &&
-     strcmp(node -> leftChild -> rightSib -> rightSib -> sym, "INDEX_LIST")==0 &&
-     node -> leftChild -> rightSib -> rightSib -> rightSib &&
-     strcmp(node -> leftChild -> rightSib -> rightSib -> rightSib -> sym, "SQ_CL")==0 &&
+     (strcmp(node -> leftChild -> sym, "ID")==0) &&
+     (node -> leftChild -> rightSib) &&
+     (strcmp(node -> leftChild -> rightSib -> sym, "SQ_OP")==0) &&
+     (node -> leftChild -> rightSib -> rightSib) &&
+     (strcmp(node -> leftChild -> rightSib -> rightSib -> sym, "INDEX_LIST")==0) &&
+     (node -> leftChild -> rightSib -> rightSib -> rightSib) &&
+     (strcmp(node -> leftChild -> rightSib -> rightSib -> rightSib -> sym, "SQ_CL")==0) &&
      (node -> leftChild -> rightSib -> rightSib -> rightSib -> rightSib == NULL))
     return true;
   return false;
@@ -612,6 +611,9 @@ void getTypeExp(TreeNode* id, TypeExpTable* table) {
   }
   id -> tag = table -> tag;
   id -> t = table -> t;
+  printf("Got tag %d for %s\n", id -> tag, id -> lexeme);
+  if(id -> tag == 0)
+    printf("prim: %d\n", id -> t.p.primitiveType);
   return;
 }
 
