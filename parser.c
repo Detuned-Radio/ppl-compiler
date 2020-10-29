@@ -1,3 +1,10 @@
+/*
+Group No.26
+Arshit Modi      2018A7PS0191P
+Devanshu         2018A7PS0194P
+Guntaas Singh    2018A7PS0269P
+Siddarth Agrawal 2018A7PS0359P
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,7 +39,7 @@ TreeNode* createParseTree(Rule* grammar, TokenList* tokenStream) {
 			}
 		}
 	}
-	
+
 	//check pass flag
 		//if true, return tree root
 		//if false, deallocate stack and tree report erroneous code
@@ -104,7 +111,7 @@ bool applyRule(Rule* grammar, int rule_index, TokenList* tokenStream, TokenList*
 			}
 		}
 	}
-	
+
 	while(!isEmpty(flushSt)) {
 		TreeNode* poppedStackNode = pop(flushSt);
 		push(st, poppedStackNode);
@@ -172,7 +179,7 @@ int main(int argc, char* argv[]) {
 	int num_rules = atoi(argv[2]);
 	Rule* grammar = readGrammar(grammar_path, num_rules);
 	// printGrammar(grammar, num_rules);
-	
+
 	FILE* fptr=fopen(argv[3], "r");
     TokenList* tokenStream=tokeniseSourcecode(fptr);
     fclose(fptr);
