@@ -39,6 +39,7 @@ Rule* readGrammar(char* grammar_path, int num_rules) {
 		addRule(grammar, i, ruleBuffer);
 	}
 	fclose(fptr);
+	printf(" ");
 	return grammar;
 }
 

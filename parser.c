@@ -7,6 +7,7 @@
 #include "stack.h"
 #include "Tree.h"
 #include "parser.h"
+#include "traverseParseTree.h"
 
 TreeNode* createParseTree(Rule* grammar, TokenList* tokenStream) {
 	//create stack
@@ -15,13 +16,13 @@ TreeNode* createParseTree(Rule* grammar, TokenList* tokenStream) {
 	TreeNode* root = createNode("program", false);
 	root -> depth = 0;
 	//push start symbol program on to stack
-	printf("Pushed %s\n", root -> sym);
+		// printf("Pushed %s\n", root -> sym);
 	push(st, root);
 	//try applying all rules for program
 	bool pass = false;
 	for(int i = 0; i < NUM_RULES; i++) {
 		if(strcmp(grammar[i].lhs, "PROGRAM") == 0) {
-			printf("Apply rule %d\n", i+1);
+				// printf("Apply rule %d\n", i+1);
 			pass = applyRule(grammar, i, tokenStream, tokenStream, st);
 			if(pass) {
 				strcpy(root -> lexeme, tokenStream -> lexeme);
@@ -46,7 +47,7 @@ bool applyRule(Rule* grammar, int rule_index, TokenList* tokenStream, TokenList*
 	SymList* ruleNode = grammar[rule_index].rhs;
 	while(ruleNode) {
 		TreeNode* newNode = createNode(ruleNode -> val, ruleNode -> isTerminal);
-		printf("Added %s to %s\n", newNode -> sym, lhs -> sym);
+		// printf("Added %s to %s\n", newNode -> sym, lhs -> sym);
 		addChild(lhs, newNode);
 		ruleNode = ruleNode -> next;
 	}
@@ -54,7 +55,7 @@ bool applyRule(Rule* grammar, int rule_index, TokenList* tokenStream, TokenList*
 	int push_count = 0;
 	TreeNode* currNode = lhs -> rightChild;
 	while(currNode) {
-		printf("Pushed %s\n", currNode -> sym);
+		// printf("Pushed %s\n", currNode -> sym);
 		push(st, currNode);
 		push_count++;
 		currNode = currNode -> leftSib;
@@ -69,7 +70,7 @@ bool applyRule(Rule* grammar, int rule_index, TokenList* tokenStream, TokenList*
 	while(!isEmpty(st) && top(st) -> isTerminal) {
 		if(curr_ptr -> token == top(st) -> sym) {
 			push_count--;
-			printf("Popped %s (%s) [%d]\n", top(st) -> sym, curr_ptr -> lexeme, push_count);
+			// printf("Popped %s (%s) [%d]\n", top(st) -> sym, curr_ptr -> lexeme, push_count);
 			TreeNode* poppedStackNode = pop(st);
 			strcpy(poppedStackNode -> lexeme, curr_ptr -> lexeme);
 			poppedStackNode -> line_no = curr_ptr -> line_no;
@@ -77,7 +78,7 @@ bool applyRule(Rule* grammar, int rule_index, TokenList* tokenStream, TokenList*
 			curr_ptr = curr_ptr -> next;
 		}
 		else {
-			printf("Match failed. st: %s, tokenStream: %s\n", top(st) -> sym, curr_ptr -> token);
+			// printf("Match failed. st: %s, tokenStream: %s\n", top(st) -> sym, curr_ptr -> token);
 			terminalPass = false;
 			break;
 		}
@@ -92,14 +93,14 @@ bool applyRule(Rule* grammar, int rule_index, TokenList* tokenStream, TokenList*
 		for(int i = 0; i < NUM_RULES; i++) {
 			if(grammar[i].lhs == top(st) -> sym) {
 				top(st) -> r = &grammar[i];
-				printf("Applied rule %d\n", i+1);
+				// printf("Applied rule %d\n", i+1);
 				top(st) -> line_no = tokenStream -> line_no;
 				top(st) -> r = &grammar[i];
 				bool res = applyRule(grammar, i, tokenStream, curr_ptr, st);
 				if(res) {
 					return true;
 				}
-				printf("Rule %d failed\n", i+1);
+				// printf("Rule %d failed\n", i+1);
 			}
 		}
 	}
@@ -170,16 +171,17 @@ int main(int argc, char* argv[]) {
 	char* grammar_path = argv[1];
 	int num_rules = atoi(argv[2]);
 	Rule* grammar = readGrammar(grammar_path, num_rules);
-	printGrammar(grammar, num_rules);
+	// printGrammar(grammar, num_rules);
 	
 	FILE* fptr=fopen(argv[3], "r");
     TokenList* tokenStream=tokeniseSourcecode(fptr);
     fclose(fptr);
-    printTokenStream(tokenStream);
+    // printTokenStream(tokenStream);
 
     TreeNode* root = createParseTree(grammar, tokenStream);
     printf("parse tree is created successfully\n");
 
     printParseTree(root, grammar);
 
+    traverseParseTree(root);
 }

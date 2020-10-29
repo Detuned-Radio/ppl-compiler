@@ -8,10 +8,17 @@
 #include "stack.h"
 #include "Tree.h"
 #include "parser.h"
+#include "traverseParseTree.h"
 
-void traverseParseTree()
+void traverseParseTree(TreeNode* root) {
+  traverseDecList(root);
+  TypeExpTable* table = (TypeExpTable*) malloc(sizeof(TypeExpTable));
+  populateTable(root, table);
+  printTypeExpressionTable(table);
+  traverseAsgList(root, table);
+}
 
-TypeExpTable* traverseDecList(TreeNode* root) {
+void traverseDecList(TreeNode* root) {
     TreeNode* programBody = root -> rightChild -> leftSib;
     TreeNode* decList = programBody -> leftChild;
     while(decList -> leftChild != decList -> rightChild)
@@ -23,20 +30,20 @@ TypeExpTable* traverseDecList(TreeNode* root) {
 }
 
 void processDecStmt(TreeNode* decStmt) {
-  if(decStmt -> leftChild -> sym == "PRIM_DECLARATION_STMT") {
+  if(strcmp(decStmt -> leftChild -> sym , "PRIM_DECLARATION_STMT")==0) {
     decStmt -> leftChild -> tag = 0; //setting tag to prim
     processPrimDecStmt(decStmt -> leftChild);
-  } else if(decStmt -> leftChild -> sym == "RECTARR_DECLARATION_STMT") {
+  } else if(strcmp(decStmt -> leftChild -> sym, "RECTARR_DECLARATION_STMT")==0) {
     decStmt -> leftChild -> tag = 1;  // setting tag to rect
     processRectDecStmt(decStmt -> leftChild); //pending: variable 
-  } else if(decStmt -> leftChild -> leftChild -> sym == "JAGGARR2D_DECLARATION_STMT") {
+  } else if(strcmp(decStmt -> leftChild -> leftChild -> sym, "JAGGARR2D_DECLARATION_STMT")==0) {
     decStmt -> leftChild -> tag = 2;  // setting tag to jagg2
     processJagg2DDecStmt(decStmt-> leftChild->leftChild);
-      decStmt-> leftChild->typeExp = decStmt-> leftChild->leftChild->TypeExp;
-  } else if(decStmt -> leftChild -> leftChild -> sym == "JAGGARR3D_DECLARATION_STMT") {
+    decStmt-> leftChild->t = decStmt-> leftChild->leftChild->t;
+  } else if(strcmp(decStmt -> leftChild -> leftChild -> sym, "JAGGARR3D_DECLARATION_STMT")==0) {
     decStmt -> leftChild -> tag = 3;  // setting tag to jagg3
     processJagg3DDecStmt(decStmt -> leftChild->leftChild);
-      decStmt-> leftChild->typeExp = decStmt-> leftChild->leftChild->TypeExp;
+    decStmt-> leftChild->t= decStmt-> leftChild->leftChild->t;
 
   }
   // copy to decStmt
@@ -50,16 +57,16 @@ void processDecStmt(TreeNode* decStmt) {
 void processPrimDecStmt(TreeNode* primDecStmt) {
   TreeNode* primTypeNode = primDecStmt -> rightChild -> leftSib -> leftChild;
   if(strcmp(primTypeNode -> lexeme, "integer") == 0)
-    primDecStmt -> t -> p -> primitiveType = 0;
+    primDecStmt -> t.p.primitiveType = 0;
   if(strcmp(primTypeNode -> lexeme, "real") == 0)
-    primDecStmt -> t -> p -> primitiveType = 1;
+    primDecStmt -> t.p.primitiveType = 1;
   if(strcmp(primTypeNode-> lexeme, "boolean") == 0)
-    primDecStmt -> t -> p -> primitiveType = 2;
+    primDecStmt -> t.p.primitiveType = 2;
 }
 
 void processRectDecStmt(TreeNode* rectDecStmt){
   TreeNode* temp = rectDecStmt -> leftChild;
-  while(temp -> sym != "RANGE_LIST")
+  while(strcmp(temp -> sym, "RANGE_LIST") != 0)
     temp = temp -> rightSib;
   TreeNode* rangeList = temp;
 
@@ -70,48 +77,48 @@ void processRectDecStmt(TreeNode* rectDecStmt){
       temp = temp -> rightChild;
   }
   dimensions++;
-  rectDecStmt -> t -> r -> dimensions = dimensions;
+  rectDecStmt -> t.r.dimensions = dimensions;
 
   // allocating memory to n ranges
-  rectDecStmt -> t -> r -> range = (int**) malloc(sizeof(int*) * dimensions);
-  for(int i = 0 ; i<n ; i++){
-    rectDecStmt -> t -> r -> range[i] = (int*) malloc(sizeof(int) * 2);
+  rectDecStmt -> t.r.range = (int**) malloc(sizeof(int*) * dimensions);
+  for(int i = 0 ; i < dimensions ; i++){
+    rectDecStmt -> t.r.range[i] = (int*) malloc(sizeof(int) * 2);
   }
 
   // assigning values to ranges
   int x = 0;
   while(rangeList-> leftChild != rangeList -> rightChild){
       // only constant lower and upper bounds supported right now
-      rectDecStmt -> t -> r -> range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives range_val -> id or constant
-      rectDecStmt -> t -> r -> range[x][1] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives second subscript of range
+      rectDecStmt -> t.r.range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives range_val -> id or constant
+      rectDecStmt -> t.r.range[x][1] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives second subscript of range
       rangeList = rangeList -> rightChild;
       x++;
   }
-  rectDecStmt -> t -> r -> range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives 
-  rectDecStmt -> t -> r -> range[x][1] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives second subscript of range
+  rectDecStmt -> t.r.range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives 
+  rectDecStmt -> t.r.range[x][1] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives second subscript of range
 
 }
 
 void processJagg2DDecStmt(TreeNode * jaggDecStmt){
   TreeNode * range = jaggDecStmt->leftChild;
-  while(range->sym!= "RANGE")
+  while(strcmp(range->sym, "RANGE") != 0)
     range = range->rightSib;
 
-  jaggDecStmt->t->j2->range0[0] = atoi(range -> leftChild -> rightSib -> leftChild -> lexeme);
-  jaggDecStmt->t->j2->range0[1] = atoi(range -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
+  jaggDecStmt->t.j2.range0[0] = atoi(range -> leftChild -> rightSib -> leftChild -> lexeme);
+  jaggDecStmt->t.j2.range0[1] = atoi(range -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
 
-  int numRows = range0[1]-range0[0]+1;
-  jaggDecStmt->t->j2->range1 = (int*) malloc(sizeof(int)* numRows);
+  int numRows = jaggDecStmt->t.j2.range0[1] - jaggDecStmt->t.j2.range0[0] + 1;
+  jaggDecStmt->t.j2.range1 = (int*) malloc(sizeof(int)* numRows);
 
   TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR2D_INIT_LIST
   int x = 0;
   do
   {
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
-    while(temp->sym != "TK_SIZE"){
+    while(strcmp(temp->sym, "TK_SIZE") !=  0) {
       temp = temp->rightSib;
     }
-    jaggDecStmt->t->j2->range1[x] = atoi(temp->rightSib->lexeme);
+    jaggDecStmt->t.j2.range1[x] = atoi(temp->rightSib->lexeme);
     x++;
     init = init->rightChild;
   }while(init->leftChild != init->rightChild);
@@ -119,14 +126,14 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
 
 void processJagg3DDecStmt(TreeNode * jaggDecStmt){
   TreeNode * range = jaggDecStmt->leftChild;
-  while(range->sym!= "RANGE")
+  while(strcmp(range->sym, "RANGE") != 0)
    range = range->rightSib;
 
-  jaggDecStmt->t->j3->range0[0] = atoi(range -> leftChild -> rightSib -> leftChild -> lexeme);
-  jaggDecStmt->t->j3->range0[1] = atoi(range -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
+  jaggDecStmt->t.j3.range0[0] = atoi(range -> leftChild -> rightSib -> leftChild -> lexeme);
+  jaggDecStmt->t.j3.range0[1] = atoi(range -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
 
-  int numRows = range0[1]-range0[0]+1;
-  jaggDecStmt->t->j3->range1 = (int**) malloc(sizeof(int*) * numRows);
+  int numRows = jaggDecStmt->t.j3.range0[1] - jaggDecStmt->t.j3.range0[0] + 1;
+  jaggDecStmt->t.j3.range1 = (int**) malloc(sizeof(int*) * numRows);
 
   TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR3D_INIT_LIST
   int x = 0;
@@ -138,11 +145,11 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       pass1 = false;
 
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
-    while(temp->sym != "TK_SIZE"){
+    while(strcmp(temp->sym, "TK_SIZE") != 0) {
       temp = temp->rightSib;
     }
-    jaggDecStmt->t->j2->range1[x] = (int*) malloc(sizeof(int)*(atoi(temp->rightSib->lexeme)+1)); 
-    jaggDecStmt->t->j2->range1[x][0] = atoi(temp->rightSib->lexeme); //size of row list stored at first place
+    jaggDecStmt->t.j3.range1[x] = (int*) malloc(sizeof(int)*(atoi(temp->rightSib->lexeme)+1)); 
+    jaggDecStmt->t.j3.range1[x][0] = atoi(temp->rightSib->lexeme); //size of row list stored at first place
     TreeNode* temp2 = temp->parent->rightChild->leftSib;  // temp2 = JAGGARR3D_ROW_LIST
     int y=0;
     int a=1;
@@ -155,9 +162,9 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
         y++;
         temp3=temp3->rightChild;
       }
-      while(temp3->leftChild !=temp3->rightChild)
+      while(temp3->leftChild !=temp3->rightChild);
 
-      jaggDecStmt->t->j2->range1[x][a] = y + 1;
+      jaggDecStmt->t.j3.range1[x][a] = y + 1;
       a++;
       temp2 = temp2->rightChild;
 
@@ -181,27 +188,49 @@ void propagateTypeExp(TreeNode* node) {
 
 void populateTable(TreeNode* root , TypeExpTable* head){
   TypeExpTable* popu = head;
-  Treenode* temp = root->rightChild->leftSib->leftChild; //DECLARATION_lIST
+  TreeNode* temp = root->rightChild->leftSib->leftChild; //DECLARATION_lIST
   do{
     TreeNode* iter = temp->leftChild->leftChild; //TYPE_DECLARATION_STMT
-    if(iter->leftChild->rightSib->sym == "TK_LIST"){
-      TreeNode* it = iter->rightChild->leftSib->leftChild; //id_list
+    if(strcmp(iter->leftChild->rightSib->sym, "TK_LIST")==0) {
+      TreeNode* it = iter->leftChild->rightSib->rightSib->rightSib->rightSib; //id_list
       do{
-        popu->identifier = strcpy(popu->identifier,it->leftChild->lexeme);
+        strcpy(popu->identifier,it->leftChild->lexeme);
         popu->t = it->t;
         popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
         popu = popu->next;
         it = it->rightChild;
-      }while(it->leftChild != it->rightChild)
-    }
-    else if(iter->leftChild->rightSib->sym == "ID"){
-      popu->identifier = strcpy(popu->identifier,iter->leftChild->rightSib->lexeme);
+      } while(it->leftChild != it->rightChild);
+    } else if(strcmp(iter->leftChild->rightSib->sym, "ID")==0){
+      strcpy(popu->identifier,iter->leftChild->rightSib->lexeme);
       popu->t = iter->t;
       popu->next = (TypeExpTable*)malloc(sizeof(TypeExpTable));
       popu = popu->next;
     }
     temp = temp->rightChild;
-  }while(temp->leftChild != temp->rightChild)
+  } while(temp->leftChild != temp->rightChild);
+
+}
+
+void printTypeExpressionTable(TypeExpTable* table) {
+  printf("%-22s%-6s%-12s%-30s\n", "VARIABLE NAME", "TYPE", "DYNAMIC", "TYPE EXPRESSION");
+  while(table) {
+    printf("%-20s  ", table -> identifier);
+    switch(table -> tag) {
+      case 0: 
+      case 1:
+        printf("%-6d", table -> tag);
+        break;
+      case 2:
+      case 3:
+        printf("%-6d", 2);
+        break;
+    }
+    //static dynamic
+    // printTypeExpr(table -> t);
+    printf("\n");
+
+    table = table -> next;
+  }
 }
 
 void traverseAsgList(TreeNode* root, TypeExpTable* table) {
@@ -209,20 +238,20 @@ void traverseAsgList(TreeNode* root, TypeExpTable* table) {
   TreeNode* asgList = programBody -> rightChild;
   while(asgList -> leftChild != asgList -> rightChild)
   {
-      processAsgStmt(asgList -> leftChild);  // process decStmt
+      processAsgStmt(asgList -> leftChild, table);  // process decStmt
       asgList = asgList -> rightChild; //move to next decListNode
   }
-  processAsgStmt(asgList -> leftChild); //process last decStmt
+  processAsgStmt(asgList -> leftChild, table); //process last decStmt
 }
 
-void processAsgStmt(TreeNode* asgStmt){
-  processExpression(asgStmt -> rightChild -> leftSib);
-  getTypeExp(asgStmt -> leftChild);
+void processAsgStmt(TreeNode* asgStmt, TypeExpTable* table){
+  processExpression(asgStmt -> rightChild -> leftSib, table);
+  getTypeExp(asgStmt -> leftChild, table);
   TypeExp lhs = asgStmt -> leftChild -> t;
   typeExpTag lhsTag = asgStmt -> leftChild -> tag;
   TypeExp rhs = asgStmt -> rightChild -> leftSib -> t;
   typeExpTag rhsTag = asgStmt -> rightChild -> leftSib -> tag;
-  if(lhsTag == 0 && equalTypeExp(lhs, lhsTag, rhs, rhsTag)) {
+  if(equalTypeExp(lhs, lhsTag, rhs, rhsTag)) {
     asgStmt -> t = lhs;
     asgStmt -> tag = lhsTag;
   } else {
@@ -230,40 +259,41 @@ void processAsgStmt(TreeNode* asgStmt){
   }
 }
 
-void processExpression(TreeNode* expr) {
+void processExpression(TreeNode* expr, TypeExpTable* table) {
   if(expr -> leftChild == NULL) {
     if(expr -> sym == "CONSTANT") {
       expr -> tag = 0;
-      expr -> t -> p -> primitiveType = 0;
+      expr -> t.p.primitiveType = 0;
       return;
     }
     if(expr -> sym == "ID") {
-      getTypeExp(expr);
+      getTypeExp(expr, table);
       return;
     }
+    return;
   }
   if(isArrayVariable(expr)) {
-    processArrayVariable(expr);
+    processArrayVariable(expr, table);
     return;
   }
   if(expr -> leftChild == expr -> rightChild) {
-    processExpression(expr -> leftChild);
+    processExpression(expr -> leftChild, table);
     expr -> t = expr -> leftChild -> t;
     expr -> tag = expr -> leftChild -> tag;
     return;
   }
-  processExpression(expr -> leftChild);
-  processExpression(expr -> rightChild);
+  processExpression(expr -> leftChild, table);
+  processExpression(expr -> rightChild, table);
   TypeExp lhs = expr -> leftChild -> t;
   typeExpTag lhsTag = expr -> leftChild -> tag;
   TypeExp rhs = expr -> rightChild -> leftSib -> t;
-  typeExpTag rhsTag = aexpr -> rightChild -> leftSib -> tag;
+  typeExpTag rhsTag = expr -> rightChild -> leftSib -> tag;
   char* operator = expr -> leftChild -> rightSib -> sym;
   if(checkOperands(lhs, lhsTag, operator, rhs, rhsTag)) {
       if(operator == "TK_DIV") {
         // always evaluates to real
         expr -> tag = 0;
-        expr -> t -> p -> primitiveType = 1; 
+        expr -> t.p.primitiveType = 1; 
       } else {
         expr -> t = expr -> leftChild -> t;
         expr -> tag = expr -> leftChild -> tag;
@@ -275,22 +305,28 @@ void processExpression(TreeNode* expr) {
 }
 
 bool isArrayVariable(TreeNode* node) {
-  if(node -> leftChild -> sym == "ID" &&
-     node -> leftChild -> rightSib -> sym == "SQ_OP" &&
-     node -> leftChild -> rightSib -> rightSib -> rightSib -> sym == "SQ_CL" &&
-     node -> leftChild -> rightSib -> rightSib -> rightSib -> rightSib == NULL)
+
+  if(node -> leftChild && 
+     strcmp(node -> leftChild -> sym, "ID")==0 &&
+     node -> leftChild -> rightSib && 
+     strcmp(node -> leftChild -> rightSib -> sym, "SQ_OP")==0 &&
+     node -> leftChild -> rightSib -> rightSib && 
+     strcmp(node -> leftChild -> rightSib -> rightSib -> sym, "INDEX_LIST")==0 &&
+     node -> leftChild -> rightSib -> rightSib -> rightSib &&
+     strcmp(node -> leftChild -> rightSib -> rightSib -> rightSib -> sym, "SQ_CL")==0 &&
+     (node -> leftChild -> rightSib -> rightSib -> rightSib -> rightSib == NULL))
     return true;
   return false;
 }
 
-void processArrayVariable(TreeNode* arrVar) {
-  getTypeExp(arrVar -> leftChild);
+void processArrayVariable(TreeNode* arrVar, TypeExpTable* table) {
+  getTypeExp(arrVar -> leftChild, table);
   TypeExp arr = arrVar -> leftChild -> t;
   typeExpTag arrTag = arrVar -> leftChild -> tag;
   TreeNode* indexList = arrVar -> rightChild -> leftSib;
   bool dynamic = false;
   if(arrTag == 1) {
-    int dimensions = arr -> r -> dimensions;
+    int dimensions = arr.r.dimensions;
     bool pass = true;
     while(indexList -> leftChild != indexList -> rightChild) {
       if(dimensions <= 0) {
@@ -305,14 +341,14 @@ void processArrayVariable(TreeNode* arrVar) {
           if(!isdigit(indexList -> leftChild -> leftChild -> lexeme[i]))
             isLiteral = false;
       }
-      if(isLiteral && (!(index >= arr -> r -> range[dimensions][0] && index <= arr -> r -> range[dimensions][1]))) {
+      if(isLiteral && (!(index >= arr.r.range[dimensions][0] && index <= arr.r.range[dimensions][1]))) {
         pass = false;
         break;
       }
     }
     if(pass) {
       arrVar -> tag = 0;
-      arrVar -> t -> p -> primitiveType = 0;
+      arrVar -> t.p.primitiveType = 0;
     } else {
       printf("ERROR: Indexing error");
     }
@@ -335,16 +371,16 @@ void processArrayVariable(TreeNode* arrVar) {
         if(!isdigit(indexList -> rightChild -> leftChild -> leftChild -> lexeme[i]))
           isLiteral1 = false;
     }
-    int low0 = arr -> j2 -> range0[0];
-    int high0 = arr -> j2 -> range0[1];
-    int size1 = arr -> j2 -> range1[index0 - low0];
+    int low0 = arr.j2.range0[0];
+    int high0 = arr.j2.range0[1];
+    int size1 = arr.j2.range1[index0 - low0];
     bool pass = (!isLiteral0 || ((index0 >= low0) && (index0 <= high0))) && 
                 (!isLiteral1 || (index1 < size1));
     if(pass) {
       arrVar -> tag = 0;
-      arrVar -> t -> p -> primitiveType = 0;
+      arrVar -> t.p.primitiveType = 0;
     } else {
-      printf("ERROR: Indexing error")
+      printf("ERROR: Indexing error");
     }
 
   } else if(arrTag == 3) {
@@ -373,18 +409,18 @@ void processArrayVariable(TreeNode* arrVar) {
         if(!isdigit(indexList -> rightChild -> rightChild -> leftChild -> leftChild -> lexeme[i]))
           isLiteral2 = false;
     }
-    int low0 = arr -> j3 -> range0[0];
-    int high0 = arr -> j3 -> range0[1];
-    int size1 = arr -> j3 -> range1[index0][0];
-    int size2 = arr -> j3 -> range1[index0][index1 + 1];
+    int low0 = arr.j3.range0[0];
+    int high0 = arr.j3.range0[1];
+    int size1 = arr.j3.range1[index0][0];
+    int size2 = arr.j3.range1[index0][index1 + 1];
     bool pass = (!isLiteral0 || ((index0 >= low0) && (index0 <= high0))) && 
                 (!isLiteral1 || (index1 < size1)) &&
                 (!isLiteral2 || (index2 < size2));
     if(pass) {
       arrVar -> tag = 0;
-      arrVar -> t -> p -> primitiveType = 0;
+      arrVar -> t.p.primitiveType = 0;
     } else {
-      printf("ERROR: Indexing error")
+      printf("ERROR: Indexing error");
     }
   }
 }
@@ -396,7 +432,7 @@ void getTypeExp(TreeNode* id, TypeExpTable* table) {
     table = table -> next;
   }
   if(table == NULL) {
-    print("Type expression table entry missing for %s.", id -> lexeme);
+    printf("Type expression table entry missing for %s.", id -> lexeme);
     return;
   }
   id -> tag = table -> tag;
@@ -407,34 +443,35 @@ void getTypeExp(TreeNode* id, TypeExpTable* table) {
 bool equalTypeExp(TypeExp a, typeExpTag atag, TypeExp b, typeExpTag btag) {
   if(atag != btag) return false;
   if(atag == 0) {
-    return (a -> p -> primitiveType == b -> p -> primitiveType);
+    return (a.p.primitiveType == b.p.primitiveType);
   } else if(atag == 1) {
-    if(a -> r -> dimensions != b -> r -> dimensions)
+    if(a.r.dimensions != b.r.dimensions)
       return false;
-    for(int i = 0; i < a -> r -> dimensions; i++)
+    for(int i = 0; i < a.r.dimensions; i++)
       for(int j = 0; j <= 1; j++)
-        if(a -> r -> range[i][j] != b -> r -> range[i][j])
+        if(a.r.range[i][j] != b.r.range[i][j])
           return false;
     return true;
   } else if(atag == 2) {
     for(int j = 0; j <= 1; j++)
-      if(a -> j2 -> range0[j] != b -> j2 -> range0[j])
+      if(a.j2.range0[j] != b.j2.range0[j])
         return false;
-    for(int i = 0; i < ((a -> j2 -> range0)[1] - (a -> j2 -> range0)[0] + 1); i++)
-      if(a -> j2 -> range1[i] != b -> j2 -> range1[i])
+    for(int i = 0; i < ((a.j2.range0)[1] - (a.j2.range0)[0] + 1); i++)
+      if(a.j2.range1[i] != b.j2.range1[i])
         return false;
     return true;
   } else {
     for(int j = 0; j <= 1; j++)
-      if(a -> j3 -> range0[j] != b -> j3 -> range0[j])
+      if(a.j3.range0[j] != b.j3.range0[j])
         return false;
-    for(int i = 0; i < ((a -> j3 -> range0)[1] - (a -> j3 -> range0)[0] + 1); i++)
-      if(a -> j3 -> range1[i][0] != b -> j3 -> range1[i][0])
+    for(int i = 0; i < ((a.j3.range0)[1] - (a.j3.range0)[0] + 1); i++) {
+      if(a.j3.range1[i][0] != b.j3.range1[i][0])
         return false;
-      for(int j = 1; j <= range1[i][0]; j++)
-        if(a -> j3 -> range1[i][j] != b -> j3 -> range1[i][j])
+      for(int j = 1; j <= b.j3.range1[i][0]; j++)
+        if(a.j3.range1[i][j] != b.j3.range1[i][j])
           return false;
-      return true;
+    }
+    return true;
   }
 }
 
@@ -442,9 +479,9 @@ bool checkOperands(TypeExp a, typeExpTag atag, char* op, TypeExp b, typeExpTag b
   if(atag != btag)
     return false;
   // allow division of arrays?
-  if(op == "TK_PLUS" || op == "TK_MINUS" || op == "TK_STAR") {
+  if(strcmp(op, "TK_PLUS")==0 || strcmp(op, "TK_MINUS")==0 || strcmp(op, "TK_STAR")==0) {
     if(atag == 0) {
-      if(a -> p -> primitiveType == 0 || a -> p -> primitiveType == 1)
+      if(a.p.primitiveType == 0 || a.p.primitiveType == 1)
         return true;
       else {
         printf("ERROR: Cannot apply arithmetic opertors on booleans.");
@@ -454,35 +491,35 @@ bool checkOperands(TypeExp a, typeExpTag atag, char* op, TypeExp b, typeExpTag b
       if(equalTypeExp(a, atag, b, btag))
         return true;
       else {
-        printf("ERROR: Size mismatch")
+        printf("ERROR: Size mismatch");
         return false;
       }
     }
-  } else if(op == "TK_DIV") {
+  } else if(strcmp(op, "TK_DIV")==0) {
     if(atag == 0) {
-      if(a -> p -> primitiveType == 0 || a -> p -> primitiveType == 1)
+      if(a.p.primitiveType == 0 || a.p.primitiveType == 1)
         return true;
       else {
         printf("ERROR: Cannot apply arithmetic opertors on booleans.");
         return false;
       }
     } else {
-      printf("ERROR: Elementwise division (Arrays of real type) not supported.")
+      printf("ERROR: Elementwise division (Arrays of real type) not supported.");
       return false;
     }
-  } else if(op == "TK_AND" || op == "TK_OR") {
+  } else if(strcmp(op, "TK_AND")==0 || strcmp(op, "TK_OR")==0) {
     if(atag == 0) {
-      if(a -> p -> primitiveType == 2)
+      if(a.p.primitiveType == 2)
         return true;
       else {
         printf("ERROR: Cannot apply logical opertors on non-boolean types.");
         return false;
       }
     } else {
-      printf("ERROR: Elementwise logical operations not supported.")
+      printf("ERROR: Elementwise logical operations not supported.");
       return false;
     }
   } else {
-    printf("ERROR: Invalid operator.\n");
+    printf("ERROR: Invalid operator (%s).\n", op);
   }
 }
