@@ -17,6 +17,8 @@ struct prim_t {
 };
 struct rect_t {
   int dimensions;
+  statDynTag statDyn;
+  char*** dynRange;
   int** range; // [][2]
 };
 struct jagg2_t {
@@ -38,7 +40,6 @@ union TypeExp {
 struct TypeExpTable {
   char identifier[LEXEME_LEN];
   typeExpTag tag;
-  statDynTag statDyn;
   TypeExp t;
   TypeExpTable* next;
 };

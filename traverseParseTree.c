@@ -82,24 +82,73 @@ void processRectDecStmt(TreeNode* rectDecStmt){
   dimensions++;
   rectDecStmt -> t.r.dimensions = dimensions;
 
+  rectDecStmt -> t.r.statDyn = 1;
+
   // allocating memory to n ranges
   rectDecStmt -> t.r.range = (int**) malloc(sizeof(int*) * dimensions);
   for(int i = 0 ; i < dimensions ; i++){
     rectDecStmt -> t.r.range[i] = (int*) malloc(sizeof(int) * 2);
   }
-
+  rectDecStmt -> t.r.dynRange = (char***) malloc(sizeof(char**) * dimensions);
+  for(int i = 0 ; i < dimensions ; i++){
+    rectDecStmt -> t.r.dynRange[i] = (char**) malloc(sizeof(char*) * 2);
+  }
   // assigning values to ranges
   int x = 0;
   while(rangeList-> leftChild != rangeList -> rightChild){
       // only constant lower and upper bounds supported right now
       rectDecStmt -> t.r.range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives range_val -> id or constant
+      if(rectDecStmt -> t.r.range[x][0] == 0) {
+        bool isLiteral = true;
+        for(int i = 0; i < strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme); i++)
+          if(!isdigit(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme[i]))
+            isLiteral = false;
+        if(!isLiteral) {
+          t.r.dynRange[x][0] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme) + 1));
+          strcpy(t.r.dynRange[x][0], rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);
+          rectDecStmt -> t.r.statDyn = 2;
+        }
+
+      }
       rectDecStmt -> t.r.range[x][1] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives second subscript of range
+      if(rectDecStmt -> t.r.range[x][1] == 0) {
+        bool isLiteral = true;
+        for(int i = 0; i < strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme); i++)
+          if(!isdigit(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme[i]))
+            isLiteral = false;
+        if(!isLiteral) {
+          t.r.dynRange[x][1] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme) + 1));
+          strcpy(t.r.dynRange[x][1], rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
+          rectDecStmt -> t.r.statDyn = 2;
+        }
+      }
       rangeList = rangeList -> rightChild;
       x++;
   }
   rectDecStmt -> t.r.range[x][0] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives 
+  if(rectDecStmt -> t.r.range[x][0] == 0) {
+    bool isLiteral = true;
+    for(int i = 0; i < strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme); i++)
+      if(!isdigit(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme[i]))
+        isLiteral = false;
+    if(!isLiteral) {
+      t.r.dynRange[x][0] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme) + 1));
+      strcpy(t.r.dynRange[x][0], rangeList -> leftChild -> leftChild -> rightSib -> leftChild -> lexeme);
+      rectDecStmt -> t.r.statDyn = 2;
+    }
+  }
   rectDecStmt -> t.r.range[x][1] = atoi(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);  //range list - ->  range - ->  second child gives second subscript of range
-
+  if(rectDecStmt -> t.r.range[x][1] == 0) {
+    bool isLiteral = true;
+    for(int i = 0; i < strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme); i++)
+      if(!isdigit(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme[i]))
+        isLiteral = false;
+    if(!isLiteral) {
+      t.r.dynRange[x][1] = (char*) malloc(sizeof(char) * (strlen(rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme) + 1));
+      strcpy(t.r.dynRange[x][1], rangeList -> leftChild -> leftChild -> rightSib -> rightSib -> rightSib -> leftChild -> lexeme);
+      rectDecStmt -> t.r.statDyn = 2;
+    }
+  }
 }
 
 void processJagg2DDecStmt(TreeNode * jaggDecStmt){
@@ -215,7 +264,7 @@ void populateTable(TreeNode* root , TypeExpTable* head){
 }
 
 void printTypeExpressionTable(TypeExpTable* table) {
-  printf("%-22s%-6s%-12s%-30s\n", "VARIABLE NAME", "TYPE", "DYNAMIC", "TYPE EXPRESSION");
+  printf("%-22s%-6s%-16s%-30s\n", "VARIABLE NAME", "TYPE", "STATIC/DYN", "TYPE EXPRESSION");
   while(table) {
     printf("%-20s  ", table -> identifier);
     switch(table -> tag) {
@@ -228,7 +277,14 @@ void printTypeExpressionTable(TypeExpTable* table) {
         printf("%-6d", 2);
         break;
     }
-    //static dynamic
+    if(table -> tag != 1){
+      printf("%-16s", "NOT_APPLICABLE");
+    } else {
+      if(table -> t.r.statDyn == 1)
+        printf("%-16s", "STATIC");
+      else
+        printf("%-16s", "DYNAMIC");
+    }
     printTypeExp(table -> t, table -> tag);
     printf("\n");
 
