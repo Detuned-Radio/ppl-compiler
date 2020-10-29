@@ -226,10 +226,38 @@ void printTypeExpressionTable(TypeExpTable* table) {
         break;
     }
     //static dynamic
-    // printTypeExpr(table -> t);
+    printTypeExp(table -> t, table -> tag);
     printf("\n");
 
     table = table -> next;
+  }
+}
+
+void printTypeExp(TypeExp t, typeExpTag tag) {
+  if(tag==0) {
+    char* ptstr= NULL;
+    switch(t.p.primitiveType) {
+      case 0:
+        ptstr = "integer";
+        break;
+      case 1:
+        ptstr = "real";
+        break;
+      case 2:
+        ptstr = "boolean";
+        break;
+    }
+    printf("<type=%s>", ptstr);
+  } else if(tag==1) {
+    printf("<type=rectangularArray, dimensions=%d, ", t.r.dimensions);
+    for(int i = 1; i <= t.r.dimensions; i++) {
+      printf("range_R%d=(%d, %d), ", i, t.r.range[i-1][0], t.r.range[i-1][1]);
+    }
+    printf("basicElementType=integer>");
+  } else if(tag==2){
+    printf("PENDING");
+  } else { //tag==3!
+    printf("PENDING");
   }
 }
 
