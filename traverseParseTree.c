@@ -162,6 +162,7 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
   int numRows = jaggDecStmt->t.j2.range0[1] - jaggDecStmt->t.j2.range0[0] + 1;
   jaggDecStmt->t.j2.range1 = (int*) malloc(sizeof(int)* numRows);
 
+  bool flag=true;
   TreeNode* init=jaggDecStmt->rightChild; //init = JAGGARR2D_INIT_LIST
   int x = 0;
   do
@@ -169,11 +170,25 @@ void processJagg2DDecStmt(TreeNode * jaggDecStmt){
     if(x)
       init = init->rightChild;
     TreeNode* temp=init->leftChild->leftChild;//temp = "R1"
+    TreeNode* valList = temp->parent->rightChild->leftSib; //valList = JAGGARR2D_VAL_LIST
     while(strcmp(temp->sym, "TK_SIZE") !=  0) {
       temp = temp->rightSib;
     }
     jaggDecStmt->t.j2.range1[x] = atoi(temp->rightSib->lexeme);
+    int num = atoi(temp->rightSib->lexeme);
+    while(valList->leftChild != valList->rightChild){
+      num--;
+      if(num<0){
+      flag=false;
+      }
+      valList = valList->rightChild;
+    }
+      num--;
+      if(num!=0)
+      flag=false;
     x++;
+     if(flag == false)
+      printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
   }while(init->leftChild != init->rightChild);
 }
 
@@ -192,6 +207,7 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
   int x = 0;
   bool pass1 = true;
   bool pass2 = true;
+  bool flag = true;
   do
   {
     if(init->leftChild != init->rightChild)
@@ -227,11 +243,13 @@ void processJagg3DDecStmt(TreeNode * jaggDecStmt){
       num_rowLists--;
       if(num_rowLists<0)
       {
-        printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
+        flag = false;
       }
 
     }while(pass2);
     
+    if(flag == false)
+      printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
     if(num_rowLists>0)
     {
       printError(init->leftChild,false,NULL,NULL,NULL,init->leftChild -> depth,"type definition error");
